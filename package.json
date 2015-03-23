@@ -1,0 +1,26 @@
+{
+  "name": "Grads",
+  "version": "1.0.0",
+  "description": "Simple API to NOAA Grads for gathering live-ish wind data for nearly every point on the surface of Earth. Data is all predicitions based on temperture differential, would not advice use for high-precision calculations.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kylehotchkiss/grads"
+  },
+  "keywords": [
+    "weather",
+    "wind",
+    "grads",
+    "noaa",
+    "api"
+  ],
+  "author": "Kyle Hotchkiss",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kylehotchkiss/grads/issues"
+  },
+  "homepage": "https://github.com/kylehotchkiss/grads"
+}
