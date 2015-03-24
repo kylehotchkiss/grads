@@ -1,0 +1,34 @@
+{
+    "gfs_hd": {
+        "slug": "gfs_hd",
+        "base": "http://nomads.ncep.noaa.gov:9090/dods/",
+        "fidelity": "high",
+        "range": {
+            "latMax": 360,
+            "lonMax": 719
+        },
+        "steps": {
+            "alt": 46,
+            "time": 64,
+            "hours": 4
+        }
+    },
+    "rap": {
+        "slug": "rap",
+        "base": "http://nomads.ncep.noaa.gov:9090/dods/",
+        "fidelity": "high",
+        "range": {
+            "latMin": 16.281,
+            "latMax": 58.02525454545,
+            "lonMin": -139.85660300000,
+            "lonMax": -57.69083517955 
+        },
+        "steps": {
+            "lat": 226,
+            "lon": 427,
+            "alt": 36,
+            "time": 18,
+            "hours": 24
+        }
+    }
+}
