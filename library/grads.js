@@ -95,8 +95,8 @@ class Grads {
         this.lat = remap( lat, this.model.range.latMin, this.model.range.latMax, 0, this.model.steps.lat );
         this.lon = remap( lon, this.model.range.lonMin, this.model.range.lonMax, 0, this.model.steps.lon );
         this.alt = alt;
-        this.time = moment().utc().subtract(3, 'hours');
-        this.midnight = moment().utc().startOf('day').subtract(3, 'hours');
+        this.time = moment().utc().subtract(4, 'hours');
+        this.midnight = moment().utc().startOf('day').subtract(4, 'hours');
     }
 
     build( variable, includeAlt ) {
