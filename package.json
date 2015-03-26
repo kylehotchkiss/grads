@@ -5,7 +5,7 @@
   "main": "index.js",
   "engines": {
     "iojs": "1.6.2"
-  }
+  },
   "scripts": {
     "scripts.start": "iojs --use_strict --harmony_classes index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
