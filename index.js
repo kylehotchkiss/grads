@@ -9,7 +9,7 @@ server.connection({
 
 server.route({
     method: 'GET',
-    path: '/conditions/{lat}/{lon}/{alt}',
+    path: '/conditions/{lat}/{lon}/{alt?}',
     handler: function( req, res ) {
         var target = new conditions( req.params.lat, req.params.lon );
 
