@@ -4,6 +4,10 @@ var Grads = require("./grads.js");
 var RADIANS = Math.PI / 180;
 var DEGREES = 180 / Math.PI;
 
+var ktof = function( k ) {
+    return (( k - 273.15) * 1.8000) + 32.00;
+};
+
 class Conditions extends Grads {
     constructor(lat, lon, alt, model ) {
         super(lat, lon, alt, model );
@@ -27,11 +31,11 @@ class Conditions extends Grads {
         });
     }
 
-    temp() {
+    temp( callback ) {
         var self = this;
 
         self.fetch( self.build("tmpsfc"), function( variable ) {
-            console.log( variable );
+            callback( ktof( variable[0][0] ) );
         });
     }
 }

@@ -84,7 +84,8 @@ class Grads {
     constructor(lat, lon, alt, model ) {
         // Verify that model exists
         if ( typeof models.noaa[model] === "undefined" ) {
-            throw new Error( model + " is not a valid weather model.");
+            //throw new Error( model + " is not a valid weather model.");
+            model = "rap";
         }
 
         // Load the model configuration

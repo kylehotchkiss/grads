@@ -1,5 +1,24 @@
-var Conditions = require("./library/conditions.js");
+var hapi = require('hapi');
+var server = new hapi.Server();
+var conditions = require("./library/conditions.js");
 
-var me = new Conditions(37.34, -79.22, 245, "rap");
+server.connection({
+    host: 'localhost',
+    port: ( process.env.PORT || 5000 )
+});
 
-me.temp();
+server.route({
+    method: 'GET',
+    path: '/conditions/{lat}/{lon}/{alt}',
+    handler: function( req, res ) {
+        var target = new conditions( req.params.lat, req.params.lon );
+
+        target.temp(function( temp ) {
+            res({
+                temp: temp
+            });
+        });
+    }
+});
+
+server.start();
