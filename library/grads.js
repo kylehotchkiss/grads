@@ -240,6 +240,8 @@ class Grads {
    fetch( url, callback ) {
        var self = this;
 
+       console.log( url );
+
        request( url, function( error, response, body ) {
            if ( !error ) {
                self.parse( body, callback );
