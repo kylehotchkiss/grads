@@ -3,7 +3,7 @@ var server = new hapi.Server();
 var conditions = require("./library/conditions.js");
 
 server.connection({
-    host: 'localhost',
+    host: '0.0.0.0',
     port: ( process.env.PORT || 5000 )
 });
 
