@@ -1,5 +1,5 @@
-var Grads = require("./library/grads.js");
+var Conditions = require("./library/conditions.js");
 
-var me = new Grads(37.34, -79.22, 300, "rap");
+var me = new Conditions(37.34, -79.22, 245, "rap");
 
-me.fetch( me.build("ugrd", true) );
+me.temp();
