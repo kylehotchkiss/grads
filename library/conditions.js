@@ -13,11 +13,11 @@ class Conditions extends Grads {
         super(lat, lon, alt, model );
     }
 
-    wind() {
+    wind( callback ) {
         var self = this;
 
-        self.fetch( self.build("vgrd", true), function( vcomp ) {
-            self.fetch( self.build("ugrd", true), function( ucomp ) {
+        self.fetch( "vgrd", true, function( vcomp ) {
+            self.fetch( "ugrd", true, function( ucomp ) {
                 var vwind = vcomp[0][0][0];
                 var uwind = ucomp[0][0][0];
 
@@ -25,8 +25,7 @@ class Conditions extends Grads {
                 var heading = ( 270 + offset ) - 180;
                 var speed = Math.sqrt( Math.pow(Math.abs(vwind), 2) + Math.pow(Math.abs(uwind), 2) );
 
-                console.log( heading );
-                console.log( speed );
+                callback( speed, heading );
             });
         });
     }
@@ -34,7 +33,7 @@ class Conditions extends Grads {
     temp( callback ) {
         var self = this;
 
-        self.fetch( self.build("tmpsfc"), function( variable ) {
+        self.fetch( "tmpsfc", false, function( variable ) {
             callback( ktof( variable[0][0] ) );
         });
     }
