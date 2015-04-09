@@ -92,6 +92,12 @@ class Grads {
         this.model = models.noaa[ model ];
         this.offset = 0;
 
+        if ( this.model.degreeseast ) {
+            if ( lon < 0 ) {
+                lon = ( 360 - (lon * -1) );
+            }
+        }
+
         // Remap set lat/lon to NOAA grads-friendly values.
         this.lat = remap( lat, this.model.range.latMin, this.model.range.latMax, 0, this.model.steps.lat );
         this.lon = remap( lon, this.model.range.lonMin, this.model.range.lonMax, 0, this.model.steps.lon );
@@ -120,14 +126,14 @@ class Grads {
                 } else if ( this.alt >= 2743 && this.alt < 3658 ) {
                     altitude = "_3658m";
                 } if ( this.alt >= 3658 && this.alt < 25908 ) {
-                    level = Math.round(( this.alt / 25908 ) * this.model.steps.alt);
+                    level = remap( this.alt, 3658, 25908, 0, this.model.steps.alt );
                     altitude = "prs";
                 } else if ( this.alt >= 25908 && this.alt < 44307 ) {
                     altitude = "30_0mb";
                 }
             } else { // RAP and GFSHD
                 if ( this.alt < 12000 ) {
-                    level = Math.round(( this.alt / 12000 ) * this.model.steps.alt);
+                    level = remap( this.alt, 0, 12000, 0, this.model.steps.alt );
                     altitude = "prs";
                 } else if ( this.alt >= 12000 && this.alt < 14000 ) {
                     altitude = "180_150mb";
@@ -153,16 +159,16 @@ class Grads {
         }
 
         // Figure out which date inside of the dataset to grab
-        offset = remap( this.time.diff(this.midnight, 'seconds'), 0, 86400, 0, this.model.steps.time );
+        offset = remap( moment().diff(this.time, 'seconds'), 0, (86400 * this.model.steps.days), 0, this.model.steps.time );
 
         // Build the model + date portion of the URL
-        model = this.model.slug + "/" + this.model.slug + this.time.format("YYYYMMDD") +
+        model = this.model.slug + "/" + this.model.name + this.time.format("YYYYMMDD") +
             "/" + this.model.slug + "_" + hourset + "z.ascii?";
 
 
         // Generate parameters portion of the URL, adding level if set
         if ( typeof level === "number" ) {
-            subset = parameters( level, offset, this.lat, this.lon );
+            subset = parameters( offset, level, this.lat, this.lon );
         } else {
             subset = parameters( offset, this.lat, this.lon );
         }
@@ -209,6 +215,8 @@ class Grads {
                     value = parseFloat(line.substring( comma + 2 ));
                     values = mdsave( values, matches( indexes, counter ), value );
                 }
+
+                console.log(content)
             }
 
             // Capture all keys and their array location
@@ -233,10 +241,15 @@ class Grads {
 
                         value = time.toJSON();
 
+                        console.log( moment( value ).format() );
                         console.log( "Difference - " + moment().diff(moment( value ), 'minutes') + " minutes");
                     }
 
                     variables[ variable ] = value;
+
+                    if ( value === "9.999E20" ) {
+                        console.warn("Fill value detected! Verify accuracy of parameters and URL");
+                    }
 
                     // Skip the value line
                     j++;
@@ -258,6 +271,8 @@ class Grads {
    fetch( variable, includeAlt, callback ) {
        var self = this;
        var url = this.build( variable, includeAlt );
+
+       console.log( url );
 
        request( url, function( error, response, body ) {
            if ( !error ) {

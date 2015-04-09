@@ -9,9 +9,9 @@ server.connection({
 
 server.route({
     method: 'GET',
-    path: '/conditions/{lat}/{lon}/{alt?}',
+    path: '/conditions/{lat}/{lon}/{alt}/{model?}',
     handler: function( req, res ) {
-        var target = new conditions( req.params.lat, req.params.lon, 0 );
+        var target = new conditions( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
 
         target.temp(function( temp ) {
             target.wind(function( speed, heading ) {
