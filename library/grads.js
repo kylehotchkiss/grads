@@ -97,14 +97,14 @@ class Grads {
         this.lon = remap( lon, this.model.range.lonMin, this.model.range.lonMax, 0, this.model.steps.lon );
         this.alt = alt;
         this.time = moment().utc().subtract(this.offset, 'hours');
-        this.midnight = this.time.startOf('day');
+        this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
     }
 
 
     increment( hours ) {
         this.offset = this.offset + ( hours || 1 );
         this.time = moment().utc().subtract(this.offset, 'hours');
-        this.midnight = this.time.startOf('day');
+        this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
     }
 
 
@@ -153,7 +153,7 @@ class Grads {
         }
 
         // Figure out which date inside of the dataset to grab
-        offset = remap( this.time.diff(this.time.startOf('day'), 'seconds'), 0, 86400, 0, this.model.steps.time );
+        offset = remap( this.time.diff(this.midnight, 'seconds'), 0, 86400, 0, this.model.steps.time );
 
         // Build the model + date portion of the URL
         model = this.model.slug + "/" + this.model.slug + this.time.format("YYYYMMDD") +
@@ -232,6 +232,8 @@ class Grads {
                             .add( seconds, 'seconds' );
 
                         value = time.toJSON();
+
+                        console.log( "Difference - " + moment().diff(moment( value ), 'minutes') + " minutes");
                     }
 
                     variables[ variable ] = value;
@@ -261,9 +263,9 @@ class Grads {
            if ( !error ) {
                self.parse( body, callback, function() {
                     // Time Travel
-                    console.log( "Time Travel" );
+                    console.log( "Time Travel - " + self.offset );
                     self.increment();
-                    //self.fetch( variable, includeAlt, callback );
+                    self.fetch( variable, includeAlt, callback );
                });
            } else {
                // Wut to do?
