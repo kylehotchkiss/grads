@@ -214,9 +214,9 @@ class Grads {
                     indexes = line.substring(0, comma);
                     value = parseFloat(line.substring( comma + 2 ));
                     values = mdsave( values, matches( indexes, counter ), value );
-                }
 
-                console.log(content)
+                    console.log( values )
+                }
             }
 
             // Capture all keys and their array location
@@ -241,8 +241,8 @@ class Grads {
 
                         value = time.toJSON();
 
-                        console.log( moment( value ).format() );
-                        console.log( "Difference - " + moment().diff(moment( value ), 'minutes') + " minutes");
+                        //console.log( moment( value ).format() );
+                        //console.log( "Difference - " + moment().diff(moment( value ), 'minutes') + " minutes");
                     }
 
                     variables[ variable ] = value;
@@ -271,8 +271,6 @@ class Grads {
    fetch( variable, includeAlt, callback ) {
        var self = this;
        var url = this.build( variable, includeAlt );
-
-       console.log( url );
 
        request( url, function( error, response, body ) {
            if ( !error ) {

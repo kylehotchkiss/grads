@@ -18,8 +18,23 @@ class Conditions extends Grads {
 
         self.fetch( "vgrd", true, function( vcomp ) {
             self.fetch( "ugrd", true, function( ucomp ) {
-                var vwind = vcomp[0][0][0];
-                var uwind = ucomp[0][0][0];
+                var uwind, vwind;
+
+                if ( typeof vcomp[0][0] === "object" ) {
+                    vwind = vcomp[0][0][0];
+                } else {
+                    vwind = vcomp[0][0];
+                }
+
+                if ( typeof ucomp[0][0] === "object" ) {
+                    uwind = ucomp[0][0][0];
+                } else {
+                    uwind = ucomp[0][0];
+                }
+
+                console.log("Winds");
+                console.log(uwind)
+                console.log(vwind)
 
                 var offset = Math.atan2( vwind, uwind ) * DEGREES;
                 var heading = ( 270 + offset ) - 180;
