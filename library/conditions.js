@@ -33,11 +33,11 @@ class Conditions extends Grads {
                 }
 
                 console.log("Winds");
-                console.log(uwind)
-                console.log(vwind)
+                console.log(vwind);
+                console.log(uwind);
 
-                var offset = Math.atan2( vwind, uwind ) * DEGREES;
-                var heading = ( 270 + offset ) - 180;
+
+                var heading = ( 270 - ( Math.atan2( vwind, uwind ) * DEGREES ) ) % 360;
                 var speed = Math.sqrt( Math.pow(Math.abs(vwind), 2) + Math.pow(Math.abs(uwind), 2) );
 
                 callback( speed, heading );

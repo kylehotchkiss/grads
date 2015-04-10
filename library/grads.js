@@ -195,7 +195,8 @@ class Grads {
         var values = {};
 
         if ( lines[0] === "<html>" ) {
-            console.log( lines[11] );
+            //console.log( lines[11] );            
+            // is not an available dataset
 
             timetravel();
         } else {
@@ -214,8 +215,6 @@ class Grads {
                     indexes = line.substring(0, comma);
                     value = parseFloat(line.substring( comma + 2 ));
                     values = mdsave( values, matches( indexes, counter ), value );
-
-                    console.log( values )
                 }
             }
 
