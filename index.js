@@ -16,9 +16,24 @@ server.route({
         target.temp(function( temp ) {
             target.wind(function( speed, heading ) {
                 res({
-                    temp: temp,
-                    windSpeed: speed,
-                    windHeading: heading
+                    conditions: {
+                        temp: temp,
+                        windSpeed: speed,
+                        windHeading: heading
+                    },
+                    meta: {
+                        requested: {
+                            lat: req.params.lat,
+                            lon: req.params.lon,
+                            alt: req.params.alt
+                        },
+                        actual: {
+
+                        },
+                        grads: {
+
+                        },
+                    }
                 });
             });
         });

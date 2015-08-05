@@ -92,7 +92,7 @@ class Grads {
         this.model = models.noaa[ model ];
         this.offset = 0;
 
-        if ( this.model.degreeseast ) {
+        if ( this.model.options.degreeseast ) {
             if ( lon < 0 ) {
                 lon = ( 360 - (lon * -1) );
             }
@@ -118,7 +118,7 @@ class Grads {
         var level, model, subset, offset, hourset, altitude;
 
         if ( includeAlt ) {
-            if ( this.model.fidelity === "low" ) { // GFS
+            if ( this.model.options.fidelity === "low" ) { // GFS
                 if ( this.alt < 1829 ) {
                     altitude = "_1829m";
                 } else if ( this.alt >= 1829 && this.alt < 2743 ) {
@@ -152,7 +152,11 @@ class Grads {
         }
 
         // Figure out which dataset to grab, based on time
-        hourset = Math.floor( remap( this.time.diff( this.midnight, 'hours'), 0, 24, 0, this.model.steps.hours ) );
+        if ( this.model.options.quarterly ) {
+            hourset = Math.round( remap( this.time.diff( this.midnight, 'hours'), 0, 24, 0, 4 ) * 6 );
+        } else {
+            hourset = Math.round( remap( this.time.diff( this.midnight, 'hours'), 0, 24, 0, 24 ) );
+        }
 
         if ( hourset < 10 ) {
             hourset = "0" + hourset;
@@ -195,7 +199,7 @@ class Grads {
         var values = {};
 
         if ( lines[0] === "<html>" ) {
-            //console.log( lines[11] );            
+            //console.log( lines[11] );
             // is not an available dataset
 
             timetravel();
@@ -240,8 +244,8 @@ class Grads {
 
                         value = time.toJSON();
 
-                        //console.log( moment( value ).format() );
-                        //console.log( "Difference - " + moment().diff(moment( value ), 'minutes') + " minutes");
+                        console.log( moment( value ).format() );
+                        console.log( "Difference - " + moment().diff(moment( value ), 'minutes') + " minutes");
                     }
 
                     variables[ variable ] = value;
@@ -258,7 +262,7 @@ class Grads {
             // TODO:
             //  - Initalize a multidimensional array
             //  - Map Variables to Values within Multdimensional Array
-            callback( values );
+            callback( values, variables );
         }
    }
 
@@ -270,6 +274,8 @@ class Grads {
    fetch( variable, includeAlt, callback ) {
        var self = this;
        var url = this.build( variable, includeAlt );
+
+       console.log(url);
 
        request( url, function( error, response, body ) {
            if ( !error ) {

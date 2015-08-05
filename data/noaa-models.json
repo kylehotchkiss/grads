@@ -3,8 +3,6 @@
         "name": "gfs",
         "slug": "gfs_0p25",
         "base": "http://nomads.ncep.noaa.gov:9090/dods/",
-        "fidelity": "low",
-        "degreeseast": true,
         "range": {
             "latMin": -90,
             "latMax": 90,
@@ -16,15 +14,18 @@
             "lon": 1440,
             "alt": 26,
             "days": 10,
-            "time": 81,
-            "hours": 24
+            "time": 81
+        },
+        "options": {
+            "fidelity": "low",
+            "quarterly": true,
+            "degreeseast": true
         }
     },
     "rap": {
         "name": "rap",
         "slug": "rap",
         "base": "http://nomads.ncep.noaa.gov:9090/dods/",
-        "fidelity": "high",
         "range": {
             "latMin": 16.281,
             "latMax": 58.02525454545,
@@ -36,8 +37,12 @@
             "lon": 427,
             "alt": 36,
             "days": 1,
-            "time": 18,
-            "hours": 24
+            "time": 18
+        },
+        "options": {
+            "fidelity": "high",
+            "quarterly": false,
+            "degreeseast": false
         }
     }
 }
