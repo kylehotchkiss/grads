@@ -14,9 +14,13 @@ var models = {
 // Remap coordinate values into more grads friendly ranges.
 // http://rosettacode.org/wiki/Map_range#JavaScript
 //
-var remap = function( value, from, to ) {
-    console.log( arguments );
-    return Math.floor( to[0] + ( value - from[0] ) * ( to[1] - to[0] ) / ( from[1] - from[0] ) );
+var remap = function( value, from, to, strict ) {
+    var result = to[0] + ( value - from[0] ) * ( to[1] - to[0] ) / ( from[1] - from[0] );
+    if ( strict ) { // Allow better proximity to data when GrADS allows it
+        return Math.floor( result );
+    } else {
+        return Math.round( result );
+    }
 };
 
 //
@@ -87,15 +91,18 @@ class Grads {
         this.model = models.noaa[ model ];
         this.offset = 0;
 
+        if ( this.model.options.degreeseast ) {
+            if ( lon < 0 ) {
+                lon = ( 360 - (lon * -1) );
+            }
+        }
+
         // Remap set lat/lon to NOAA grads-friendly values.
-        this.lat = remap( lat, [ this.model.range.latMin, this.model.range.latMax ] , [ 0, this.model.steps.lat ] );
-        this.lon = remap( lon, [ this.model.range.lonMin, this.model.range.lonMax ], [ 0, this.model.steps.lon ] );
+        this.lat = remap( lat, [ this.model.range.latMin, this.model.range.latMax ] , [ 0, this.model.steps.lat ], true );
+        this.lon = remap( lon, [ this.model.range.lonMin, this.model.range.lonMax ], [ 0, this.model.steps.lon ], true );
         this.alt = alt;
         this.time = moment().utc().subtract(this.offset, 'hours');
         this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
-
-        console.log( this.lon );
-        console.log( this.lat );
     }
 
 
@@ -118,14 +125,14 @@ class Grads {
                 } else if ( this.alt >= 2743 && this.alt < 3658 ) {
                     altitude = "_3658m";
                 } if ( this.alt >= 3658 && this.alt < 25908 ) {
-                    level = remap( this.alt, [ 3658, 25908 ], [ 0, this.model.steps.alt ] );
+                    level = remap( this.alt, [ 3658, 25908 ], [ 0, this.model.steps.alt ], true );
                     altitude = "prs";
                 } else if ( this.alt >= 25908 && this.alt < 44307 ) {
                     altitude = "30_0mb";
                 }
             } else { // RAP and GFSHD
                 if ( this.alt < 12000 ) {
-                    level = remap( this.alt, [ 0, 12000 ], [ 0, this.model.steps.alt ] );
+                    level = remap( this.alt, [ 0, 12000 ], [ 0, this.model.steps.alt ], true );
                     altitude = "prs";
                 } else if ( this.alt >= 12000 && this.alt < 14000 ) {
                     altitude = "180_150mb";
@@ -145,17 +152,21 @@ class Grads {
 
         // Figure out which dataset to grab, based on time
         if ( this.model.options.quarterly ) {
-            hourset = Math.round( remap( this.time.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 4 ] ) * 6 );
+            hourset = Math.round( remap( this.time.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 4 ], true ) * 6 );
         } else {
-            hourset = Math.round( remap( this.time.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 24 ] ) );
+            hourset = Math.round( remap( this.time.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 24 ], true ) );
         }
+
+        // In theory, this fixes our crazy offset issues.
+        this.time.set('hour', hourset);
 
         if ( hourset < 10 ) {
             hourset = "0" + hourset;
         }
 
         // Figure out which date inside of the dataset to grab
-        offset = remap( moment().diff(this.time, 'seconds'), [ 0, (86400 * this.model.steps.days) ], [ 0, this.model.steps.time ] );
+        // Wrong for GFS
+        offset = remap( moment().diff(this.time, 'seconds'), [ 0, ( 86400 * this.model.steps.days ) ], [ 0, this.model.steps.time ] );
 
         // Build the model + date portion of the URL
         model = this.model.slug + "/" + this.model.name + this.time.format("YYYYMMDD") +
@@ -191,10 +202,8 @@ class Grads {
         var values = {};
 
         if ( lines[0] === "<html>" ) {
-            console.log( lines[11] );
-
             if ( lines[11].indexOf('Invalid Parameter Exception') ) {
-                console.log('Constraint validation failed');
+                console.log('GrADS Constraint validation failed');
             } else {
                 timetravel();
             }
@@ -239,7 +248,7 @@ class Grads {
 
                         value = time.toJSON();
 
-                        console.log( moment( value ).format() );
+                        //console.log( moment( value ).format() );
                         console.log( "Difference - " + moment().diff(moment( value ), 'minutes') + " minutes");
                     }
 
