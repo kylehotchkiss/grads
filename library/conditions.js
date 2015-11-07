@@ -1,5 +1,6 @@
 /* jshint esnext:true */
-var Grads = require("./grads.js");
+'use strict';
+var Grads = require('./grads.js');
 
 var RADIANS = Math.PI / 180;
 var DEGREES = 180 / Math.PI;
@@ -9,8 +10,8 @@ var ktof = function( k ) {
 };
 
 class Conditions extends Grads {
-    constructor(lat, lon, alt, model ) {
-        super(lat, lon, alt, model );
+    constructor( lat, lon, alt, model ) {
+        super( lat, lon, alt, model );
     }
 
     wind( callback ) {
