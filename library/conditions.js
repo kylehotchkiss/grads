@@ -9,6 +9,10 @@ var ktof = function( k ) {
     return (( k - 273.15) * 1.8000) + 32.00;
 };
 
+var mstomph = function( ms ) {
+    return ms * 2.23694;
+};
+
 class Conditions extends Grads {
     constructor( lat, lon, alt, model ) {
         super( lat, lon, alt, model );
@@ -33,11 +37,10 @@ class Conditions extends Grads {
                     uwind = ucomp[0][0];
                 }
 
-
                 var heading = ( 270 - ( Math.atan2( vwind, uwind ) * DEGREES ) ) % 360;
                 var speed = Math.sqrt( Math.pow(Math.abs(vwind), 2) + Math.pow(Math.abs(uwind), 2) );
 
-                callback( speed, heading );
+                callback( mstomph(speed), heading );
             });
         });
     }

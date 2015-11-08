@@ -1,43 +1,43 @@
-var hapi = require('hapi');
-var server = new hapi.Server();
+//
+// index.js
+// Loads a quick demo for GrADS stuff
+//
+
+'use strict';
+
+var express = require('express');
+
 var conditions = require("./library/conditions.js");
 
-server.connection({
-    host: '0.0.0.0',
-    port: ( process.env.PORT || 5000 )
-});
+var app = express();
 
-server.route({
-    method: 'GET',
-    path: '/conditions/{lat}/{lon}/{alt}/{model?}',
-    handler: function( req, res ) {
-        var target = new conditions( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
+app.use( express.static('public') );
 
-        target.temp(function( temp ) {
-            target.wind(function( speed, heading ) {
-                res({
-                    conditions: {
-                        temp: temp,
-                        windSpeed: speed,
-                        windHeading: heading
+app.get('/conditions/:lat/:lon/:alt/:model?', function ( req, res ) {
+    var target = new conditions( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
+
+    target.temp(function( temp ) {
+        target.wind(function( speed, heading ) {
+            res.json({
+                conditions: {
+                    temp: temp,
+                    windSpeed: speed,
+                    windHeading: heading
+                },
+                meta: {
+                    requested: {
+                        lat: req.params.lat,
+                        lon: req.params.lon,
+                        alt: req.params.alt
                     },
-                    meta: {
-                        requested: {
-                            lat: req.params.lat,
-                            lon: req.params.lon,
-                            alt: req.params.alt
-                        },
-                        actual: {
-
-                        },
-                        grads: {
-
-                        },
-                    }
-                });
+                    actual: {},
+                    grads: {},
+                }
             });
         });
-    }
+    });
 });
 
-server.start();
+app.listen(process.env.PORT || 3000, function() {
+    console.log('Welcome to grads; check me out http://localhost:3000');
+});

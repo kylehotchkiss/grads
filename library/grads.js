@@ -1,13 +1,13 @@
-/* jshint esnext:true */
+//
+// grads.js
+// This file is the primary interface with NOAA's GrADS dataset.
+//
+
 'use strict';
 
-var async = require('async');
 var moment = require('moment');
 var request = require('request');
-
-var models = {
-    noaa: require("../data/noaa-models.json")
-};
+var models = { noaa: require("../data/noaa-models.json") };
 
 
 //
@@ -22,6 +22,7 @@ var remap = function( value, from, to, strict ) {
         return Math.round( result );
     }
 };
+
 
 //
 // Hacky code to build and add to multidimesional arrays
@@ -195,7 +196,7 @@ class Grads {
      *
      */
     parse( content, callback, timetravel ) {
-        var key, line, temp, comma, index, value, indexes, breakout;
+        var key, line, comma, value, indexes;
         var lines = content.split("\n");
         var counter = /\[(\d)\]/g;
         var variables = {};
@@ -203,10 +204,11 @@ class Grads {
 
         if ( lines[0] === "<html>" ) {
             if ( lines[11].indexOf('Invalid Parameter Exception') ) {
-                console.log('GrADS Constraint validation failed');
-            } else {
-                timetravel();
+                // Figure out why we're time travelling, if we want.
+                //console.log( lines[11] );
             }
+
+            timetravel();
         } else {
             // Capture all values and their array location
             for ( var i = 1; i < lines.length; i++ ) {
@@ -248,8 +250,9 @@ class Grads {
 
                         value = time.toJSON();
 
-                        //console.log( moment( value ).format() );
-                        console.log( "Difference - " + moment().diff(moment( value ), 'minutes') + " minutes");
+                        // Debug:
+                        // console.log( moment( value ).format() );
+                        // console.log( "Difference - " + moment().diff(moment( value ), 'minutes') + " minutes");
                     }
 
                     variables[ variable ] = value;
@@ -279,17 +282,17 @@ class Grads {
        var self = this;
        var url = this.build( variable, includeAlt );
 
-       console.log(url);
+       // Debug:
+       // console.log(url);
 
        request( url, function( error, response, body ) {
            if ( !error ) {
                self.parse( body, callback, function() {
                     // Time Travel
-                    console.log( "Time Travel - " + self.offset );
+                    //console.log( "Time Travel - " + self.offset );
                     self.increment();
                     self.fetch( variable, includeAlt, callback );
                });
-           } else {
                // Wut to do?
            }
        });

@@ -1,0 +1,26 @@
+body {
+    background-image:url('background.png');
+    background-size: cover;
+    font-family: "jubilat", serif;
+    font-size: 16px;
+}
+
+article {
+    background-color: #FFFFFF;
+    padding: 30px;
+    min-height: 600px;
+}
+
+body {
+    padding: 60px 0;
+}
+
+p {
+    line-height: 1.6em;
+    margin: 0 0 1.6em 0;
+}
+
+.map {
+    cursor: pointer;
+    height: 450px;
+}
