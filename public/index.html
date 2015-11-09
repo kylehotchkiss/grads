@@ -16,41 +16,74 @@
             <div class="row">
                 <div class="col-sm-10 col-sm-offset-1">
                     <article>
-                        <h1>Grads: a javascript library<br />for accessing global weather conditions</h1>
-                        <p>
-                            <a href="https://github.com/kylehotchkiss/grads">Grads</a> will allow you to get estimated weather conditions for nearly any point on the globe. It's based on NOAA's excellent GFS/RAP weather models.
-                            This is the same data that many weather predictions are made from, but other data is often mixed in as well.
-                        </p><p>
-                            NOAA provides all this data in gridded binary form for professionals to load into specialized software to run simulations, see weather trends and so forth.
-                            But they also provide this data in ASCII so this library generates the URLs needed to access this data, makes the request, and decodes the data into a human-consumable format.
-                            This data is not provided via APIs, and the timing of new data releases isn't set in stone, so there are still some issues when datasets should be available and aren't.
-                        </p><p>
-                            I originally started this code several years back, trying to build a trajectory predictor. Accessing it was the piece of the puzzle that made the trajectory predictor "work" but it was also the most complex and difficult to debug. I've spent time trying to figure out the (undocumented) proper way to pass variables and this is the solution I've come up with!
-                        </p><p>
-                            <em>This data and the associated library are not suitable for production app usage, nor are they suitable for making formal decisions on weather conditions. Do not rely on this data with your life, your safety, or your resources. There are paid solutions meeting these sort of accuracy needs. You have been warned!</em>
-                        </p>
+                        <section>
+                            <h1>Grads: a javascript library<br />for accessing global weather conditions</h1>
+                            <p>
+                                <a href="https://github.com/kylehotchkiss/grads">Grads</a> will allow you to get estimated weather conditions for nearly any point on the globe. It's based on NOAA's excellent GFS/RAP weather models.
+                                This is the same data that many weather predictions are made from, but other data is often mixed in as well.
+                            </p><p>
+                                NOAA provides all this data in gridded binary form for professionals to load into specialized software to run simulations, see weather trends and so forth.
+                                But they also provide this data in ASCII so this library generates the URLs needed to access this data, makes the request, and decodes the data into a human-consumable format.
+                                This data is not provided via APIs, and the timing of new data releases isn't set in stone, so there are still some issues when datasets should be available and aren't.
+                            </p><p>
+                                I originally started this code several years back, trying to build a trajectory predictor. Accessing it was the piece of the puzzle that made the trajectory predictor "work" but it was also the most complex and difficult to debug. I've spent time trying to figure out the (undocumented) proper way to pass variables and this is the solution I've come up with!
+                            </p><p>
+                                <em>This data and the associated library are not suitable for production app usage, nor are they suitable for making formal decisions on weather conditions. Do not rely on this data with your life, your safety, or your resources. There are paid solutions meeting these sort of accuracy needs. You have been warned!</em>
+                            </p>
+                        </section>
 
+                        <section>
+                            <h2>Demo: Weather Conditions</h2>
+                            <p>Click on any point in the map to get weather condition for that location. If nothing shows up, then try clicking another location (NOAA's datasource can be sticky sometimes). This demo uses GFS, but in the future will select a more precise model if one is available.</p>
+                            <div id="demo-one" class="map"></div>
 
-                        <h2>Demo</h2>
-                        <p>Click on any point in the map to get weather condition for that location. If nothing shows up, then try clicking another location (NOAA's datasource can be sticky sometimes). This demo uses GFS, but in the future will select a more precise model if one is available.</p>
-                        <div id="map" class="map"></div>
-
-                        <h3>Weather Conditions</h3>
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <ul>
-                                    <li>Latitude: <span class="js-lat"></span></li>
-                                    <li>Longitude: <span class="js-lon"></span></li>
-                                </ul>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <h4>Location</h4>
+                                    <ul>
+                                        <li>Latitude: <span class="js-demo-one-lat"></span></li>
+                                        <li>Longitude: <span class="js-demo-one-lon"></span></li>
+                                    </ul>
+                                </div>
+                                <div class="col-sm-6">
+                                    <h4>Conditions</h4>
+                                    <ul>
+                                        <li>Temperture: <span class="js-demo-one-temp js-demo-one-cond"></span></li>
+                                        <li>Wind Speed: <span class="js-demo-one-windSpeed js-demo-one-cond"></span></li>
+                                        <li>Wind Heading: <span class="js-demo-one-windHeading js-demo-one-cond"></span></li>
+                                    </ul>
+                                </div>
                             </div>
-                            <div class="col-sm-6">
-                                <ul>
-                                    <li>Temperture: <span class="js-temp js-cond"></span></li>
-                                    <li>Wind Speed: <span class="js-windSpeed js-cond"></span></li>
-                                    <li>Wind Heading: <span class="js-windHeading js-cond"></span></li>
-                                </ul>
+                        </section>
+
+                        <section>
+                            <h2>Demo: Ocean Waves</h2>
+                            <p>Click any spot in the ocean to get a wave report. I've never driven a ship but asked a friend who has driven boats that have a downstairs about how to showcase this info and here's the format he recommends! This piece generates a lot of queries so please don't click too much.</p>
+
+                            <div id="demo-two" class="map"></div>
+
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <h4>Location</h4>
+                                    <ul>
+                                        <li>Latitude: <span class="js-demo-two-lat"></span></li>
+                                        <li>Longitude: <span class="js-demo-two-lon"></span></li>
+                                    </ul>
+                                </div>
+                                <div class="col-sm-3">
+                                    <h4>Primary Swell</h4>
+                                    <div class="js-demo-two-primary js-demo-two-cond"></div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <h4>Secondary Swell</h4>
+                                    <div class="js-demo-two-secondary js-demo-two-cond"></div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <h4>Wind Swell</h4>
+                                    <div class="js-demo-two-wind js-demo-two-cond"></div>
+                                </div>
                             </div>
-                        </div>
+                        </section>
                     </article>
                     <footer class="text-center">
                         <small>Copyright &copy; 2012 - 2015 Kyle Hotchkiss &bull; Freely available via the MIT licence</small>

@@ -81,7 +81,7 @@ var matches = function( string, regex, index ) {
 
 
 class Grads {
-    constructor(lat, lon, alt, model ) {
+    constructor( lat, lon, alt, model ) {
         // Verify that model exists
         if ( typeof models.noaa[model] === "undefined" ) {
             //throw new Error( model + " is not a valid weather model.");
@@ -91,6 +91,7 @@ class Grads {
         // Load the model configuration
         this.model = models.noaa[ model ];
         this.offset = 0;
+        this.counter = 0;
 
         if ( this.model.options.degreeseast ) {
             if ( lon < 0 ) {
@@ -166,13 +167,16 @@ class Grads {
         }
 
         // Figure out which date inside of the dataset to grab
-        // Wrong for GFS
         offset = remap( moment().diff(this.time, 'seconds'), [ 0, ( 86400 * this.model.steps.days ) ], [ 0, this.model.steps.time ] );
 
         // Build the model + date portion of the URL
-        model = this.model.slug + "/" + this.model.name + this.time.format("YYYYMMDD") +
-            "/" + this.model.slug + "_" + hourset + "z.ascii?";
-
+        if ( this.model.slug === 'wave' ) { // TODO: Allow for passing arbirary naming formats via config
+            model = this.model.slug + "/" + this.model.name + '/' + this.time.format("YYYYMMDD") +
+                "/multi_1.glo_30mext" + this.time.format("YYYYMMDD") + "_" + hourset + "z.ascii?";
+        } else {
+            model = this.model.slug + "/" + this.model.name + this.time.format("YYYYMMDD") +
+                "/" + this.model.slug + "_" + hourset + "z.ascii?";
+        }
 
         // Generate parameters portion of the URL, adding level if set
         if ( typeof level === "number" ) {
@@ -205,7 +209,7 @@ class Grads {
         if ( lines[0] === "<html>" ) {
             if ( lines[11].indexOf('Invalid Parameter Exception') ) {
                 // Figure out why we're time travelling, if we want.
-                //console.log( lines[11] );
+                // console.log( lines[11] );
             }
 
             timetravel();
@@ -223,7 +227,14 @@ class Grads {
                 } else {
                     comma = line.indexOf(",");
                     indexes = line.substring(0, comma);
-                    value = parseFloat(line.substring( comma + 2 ));
+
+                    if ( line.substring( comma + 2 ) === "9.999E20" ) {
+                        //console.warn("Fill value detected! Verify accuracy of parameters and URL");
+                        value = null;
+                    } else {
+                        value = parseFloat(line.substring( comma + 2 ));
+                    }
+
                     values = mdsave( values, matches( indexes, counter ), value );
                 }
             }
@@ -257,10 +268,6 @@ class Grads {
 
                     variables[ variable ] = value;
 
-                    if ( value === "9.999E20" ) {
-                        console.warn("Fill value detected! Verify accuracy of parameters and URL");
-                    }
-
                     // Skip the value line
                     j++;
                 }
@@ -269,6 +276,8 @@ class Grads {
             // TODO:
             //  - Initalize a multidimensional array
             //  - Map Variables to Values within Multdimensional Array
+            //
+            // console.log( 'Requests:' + this.counter );
             callback( values, variables );
         }
    }
@@ -286,10 +295,11 @@ class Grads {
        // console.log(url);
 
        request( url, function( error, response, body ) {
+           self.counter++;
+
            if ( !error ) {
                self.parse( body, callback, function() {
                     // Time Travel
-                    //console.log( "Time Travel - " + self.offset );
                     self.increment();
                     self.fetch( variable, includeAlt, callback );
                });

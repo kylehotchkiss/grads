@@ -6,10 +6,10 @@
 'use strict';
 
 var express = require('express');
-
-var conditions = require("./library/conditions.js");
-
 var app = express();
+
+var sea = require('./library/abstractions/sea.js');
+var conditions = require("./library/conditions.js");
 
 app.use( express.static('public') );
 
@@ -37,6 +37,17 @@ app.get('/conditions/:lat/:lon/:alt/:model?', function ( req, res ) {
         });
     });
 });
+
+app.get('/sea/:lat/:lon', function ( req, res ) {
+    var target = new sea( req.params.lat, req.params.lon );
+
+    console.time("Catching some Waves");
+    target.wavesDetail(function( results ) {
+        console.timeEnd("Catching some Waves");
+        res.json( results );
+    });
+});
+
 
 app.listen(process.env.PORT || 3000, function() {
     console.log('Welcome to grads; check me out http://localhost:3000');

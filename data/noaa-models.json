@@ -44,5 +44,50 @@
             "quarterly": false,
             "degreeseast": false
         }
+    },
+    "hrrr": {
+        "name": "hrrr",
+        "slug": "hrrr",
+        "base": "http://nomads.ncep.noaa.gov:9090/dods/",
+        "range": {
+            "latMin": 21.14067100000,
+            "latMax": 52.61339827273,
+            "lonMin": -134.09612700000,
+            "lonMax": -60.93723597484
+        },
+        "steps": {
+            "lat": 1155,
+            "lon": 2503,
+            "alt": 5,
+            "days": 1,
+            "time": 16
+        },
+        "options": {
+            "fidelity": "high",
+            "quarterly": false,
+            "degreeseast": false
+        }
+    },
+    "wave": {
+        "name": "mww3",
+        "slug": "wave",
+        "base": "http://nomads.ncep.noaa.gov:9090/dods/",
+        "range": {
+            "latMin": -77.50000000000,
+            "latMax": 90,
+            "lonMin": 0,
+            "lonMax": 360
+        },
+        "steps": {
+            "lat": 336,
+            "lon": 720,
+            "days": 7,
+            "time": 61
+        },
+        "options": {
+            "fidelity": "low",
+            "quarterly": true,
+            "degreeseast": true
+        }
     }
 }
