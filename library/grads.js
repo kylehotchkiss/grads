@@ -299,6 +299,13 @@ class Grads {
                             // console.log( moment( refvalues[l] ).format() );
                             // console.log( "Difference - " + moment().diff(moment( refvalues[l] ), 'minutes') + " minutes");
                         }
+                    } else if ( variable === 'lon' && this.model.options.degreeseast ) {
+                        // Make sure longitudes > 180 become negative values
+                        for ( var n in refvalues ) {
+                            if ( refvalues[n] > 180 ) {
+                                refvalues[n] = -1 * ( 360 - refvalues[n] );
+                            }
+                        }
                     }
 
                     variables[ variable ] = refvalues;
