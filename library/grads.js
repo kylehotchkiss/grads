@@ -89,30 +89,75 @@ class Grads {
         }
 
         // Load the model configuration
-        this.offset = 0; // 0
+        this.lat = [];
+        this.lon = [];
+        this.offset = 0;
         this.counter = 0;
         this.incrementCounter = 0;
         this.model = models.noaa[ model ];
+        this.time = moment().utc().subtract(this.offset, 'hours');
+        this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
 
+        // Read in ranges for Latitude, Longitude, and Altitude
+        // Verify ranges are small:large
+        // TODO: Can make this more robust in future by flipping them for user
+        if ( lat.indexOf(':') !== -1 ) {
+            lat = lat.split(':');
+
+            if ( parseFloat(lat[0]) > parseFloat(lat[1]) ) {
+                throw new Error('Smaller Latitude must occur first in range');
+            }
+        } else {
+            lat = [ lat ];
+        }
+
+        if ( lon.indexOf(':') !== -1 ) {
+            lon = lon.split(':');
+
+            if ( parseFloat(lon[0]) > parseFloat(lon[1]) ) {
+                throw new Error('Smaller Longitude must occur first in range');
+            }
+        } else {
+            lon = [ lon ];
+        }
+
+        if ( alt.indexOf(':') !== -1 ) {
+            alt = alt.split(':');
+
+            if ( parseFloat(alt[0]) > parseFloat(alt[1]) ) {
+                throw new Error('Smaller Altitude must occur first in range');
+            }
+        } else {
+            alt = [ alt ];
+        }
+
+        // If we're using a degreeseast model, convert the longitude to 0-360deg
         if ( this.model.options.degreeseast ) {
-            if ( lon < 0 ) {
-                lon = ( 360 - (lon * -1) );
+            for ( var i in lon ) {
+                if ( lon[i] < 0 ) {
+                    lon[i] = ( 360 - (lon[i] * -1) );
+                }
             }
         }
 
-        // Validate Boundaries
-        if ( lat < this.model.range.latMin || lat > this.model.range.latMax ) {
-            throw new Error('Latitude is out of model bounds');
-        } else if ( lon < this.model.range.lonMin || lat > this.model.range.lonMax ) {
-            throw new Error('Longitude is out of model bounds');
+        // Validate Boundaries and set grads-friendly coordinate sets
+        for ( var j in lat ) {
+            if ( lat[j] < this.model.range.latMin || lat[j] > this.model.range.latMax ) {
+                throw new Error('Latitude is out of model bounds');
+            }
+
+            this.lat.push( remap( lat[j], [ this.model.range.latMin, this.model.range.latMax ] , [ 0, this.model.steps.lat ], true ) );
         }
 
-        // Remap set lat/lon to NOAA grads-friendly values.
-        this.lat = remap( lat, [ this.model.range.latMin, this.model.range.latMax ] , [ 0, this.model.steps.lat ], true );
-        this.lon = remap( lon, [ this.model.range.lonMin, this.model.range.lonMax ], [ 0, this.model.steps.lon ], true );
+        for ( var k in lon ) {
+            if ( lon[k] < this.model.range.lonMin || lon[k] > this.model.range.lonMax ) {
+                throw new Error('Longitude is out of model bounds');
+            }
+
+            this.lon.push( remap( lon, [ this.model.range.lonMin, this.model.range.lonMax ], [ 0, this.model.steps.lon ], true ) );
+        }
+
         this.alt = alt;
-        this.time = moment().utc().subtract(this.offset, 'hours');
-        this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
     }
 
 
@@ -122,7 +167,7 @@ class Grads {
         this.time = moment().utc().subtract(this.offset, 'hours');
         this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
 
-        //console.log( 'Time Travel Iteration: ' + this.incrementCounter );
+        // console.log( 'Time Travel Iteration: ' + this.incrementCounter );
     }
 
 
