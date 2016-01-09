@@ -84,15 +84,15 @@ class Grads {
     constructor( lat, lon, alt, model ) {
         // Verify that model exists
         if ( typeof models.noaa[model] === "undefined" ) {
-            //throw new Error( model + " is not a valid weather model.");
+            // throw new Error( model + " is not a valid weather model.");
             model = "rap";
         }
 
         // Load the model configuration
-        this.model = models.noaa[ model ];
-        this.offset = 0; //0
+        this.offset = 0; // 0
         this.counter = 0;
         this.incrementCounter = 0;
+        this.model = models.noaa[ model ];
 
         if ( this.model.options.degreeseast ) {
             if ( lon < 0 ) {
@@ -100,6 +100,7 @@ class Grads {
             }
         }
 
+        // Validate Boundaries
         if ( lat < this.model.range.latMin || lat > this.model.range.latMax ) {
             throw new Error('Latitude is out of model bounds');
         } else if ( lon < this.model.range.lonMin || lat > this.model.range.lonMax ) {
@@ -230,7 +231,12 @@ class Grads {
 
                 // Stop looping when we hit the 3 blanks spaces
                 // that GrADS uses to seperate values from key
-                if ( line === '' ) {
+
+                // When the data is not 3D, blank lines mean we can parse variables
+                // But when we switch over to 3D data, we need to check for the `time`
+                // variable which appears consistant throughout requests
+                // if ( line === '' ) {
+                if ( line.indexOf('time,') !== -1 ) {
                     key = i;
 
                     break;
@@ -239,7 +245,7 @@ class Grads {
                     indexes = line.substring(0, comma);
 
                     if ( line.substring( comma + 2 ) === "9.999E20" ) {
-                        //console.warn("Fill value detected! Verify accuracy of parameters and URL");
+                        // console.warn("Fill value detected! Verify accuracy of parameters and URL");
                         value = null;
                     } else {
                         value = parseFloat(line.substring( comma + 2 ));
@@ -249,44 +255,59 @@ class Grads {
                 }
             }
 
-            // Capture all keys and their array location
+            if ( !key ) {
+                throw new Error('Checking for `time` variable inside of Grads response failed - unable to assign key names');
+            }
+
+            // Capture all keys (references) and their array location
+            // Can you tell I can't name variables well at this level of iteration yet?
             for ( var j = key; j < lines.length; j++ ) {
                 line = lines[j];
 
-                // Verify we're looking at a key and not a value
-                if ( line.indexOf(",") !== -1 ) {
-                    comma = line.indexOf(",");
-                    var variable = line.substring(0, comma);
-                    value = parseFloat( lines[ j + 1 ] );
+                // Verify we're looking at a key and not a value by checking for [%]
+                if ( line.indexOf("[") !== -1 && line.indexOf("]") !== -1 ) {
+                    var refvalues = [];
+                    var refcomma = line.indexOf(",");
+                    var variable = line.substring(0, refcomma);
+
+                    if ( lines[ j + 1 ].indexOf(',') !== -1 ) {
+                        // Data is 3D
+                        var entries = lines[ j + 1 ].split(',');
+
+                        for ( var k in entries ) {
+                            refvalues.push( parseFloat( entries[k] ) );
+                        }
+                    } else {
+                        refvalues.push( parseFloat( lines[ j + 1 ] ) );
+                    }
 
                     // Lightly process variables
                     if ( variable === "time" ) {
                         // GrADS time is days since 1-1-1
                         // Set days since to Unix Epoch
-                        var days = value - 719164;
-                        var seconds = ( days % 1 ) * 86400;
-                        var time = moment.utc( 0 )
-                            .add( days, 'days' )
-                            .add( seconds, 'seconds' );
 
-                        value = time.toJSON();
+                        for ( var l in refvalues ) {
+                            var days = refvalues[l] - 719164;
+                            var seconds = ( days % 1 ) * 86400;
+                            var time = moment.utc( 0 )
+                                .add( days, 'days' )
+                                .add( seconds, 'seconds' );
 
-                        // Debug:
-                        // console.log( moment( value ).format() );
-                        // console.log( "Difference - " + moment().diff(moment( value ), 'minutes') + " minutes");
+                            refvalues[l] = time.toJSON();
+
+                            // Debug:
+                            // console.log( moment( refvalues[l] ).format() );
+                            // console.log( "Difference - " + moment().diff(moment( refvalues[l] ), 'minutes') + " minutes");
+                        }
                     }
 
-                    variables[ variable ] = value;
+                    variables[ variable ] = refvalues;
 
                     // Skip the value line
                     j++;
                 }
             }
 
-            // TODO:
-            //  - Initalize a multidimensional array
-            //  - Map Variables to Values within Multdimensional Array
-            //
             // console.log( 'Requests:' + this.counter );
             callback( values, variables );
         }
@@ -302,7 +323,7 @@ class Grads {
        var url = this.build( variable, includeAlt );
 
        // Debug:
-       console.log(url);
+       //console.log( url );
 
        request( url, function( error, response, body ) {
            self.counter++;
@@ -313,6 +334,7 @@ class Grads {
                     self.increment();
                     self.fetch( variable, includeAlt, callback );
                });
+
                // Wut to do?
            }
        });

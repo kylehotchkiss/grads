@@ -21,7 +21,7 @@ class Conditions extends Grads {
     wind( callback ) {
         var self = this;
 
-        self.fetch( "vgrd", true, function( vcomp ) {
+        self.fetch( "vgrd", true, function( vcomp, variables ) {
             self.fetch( "ugrd", true, function( ucomp ) {
                 var uwind, vwind;
 
