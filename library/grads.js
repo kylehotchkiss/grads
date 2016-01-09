@@ -90,13 +90,20 @@ class Grads {
 
         // Load the model configuration
         this.model = models.noaa[ model ];
-        this.offset = 0;
+        this.offset = 0; //0
         this.counter = 0;
+        this.incrementCounter = 0;
 
         if ( this.model.options.degreeseast ) {
             if ( lon < 0 ) {
                 lon = ( 360 - (lon * -1) );
             }
+        }
+
+        if ( lat < this.model.range.latMin || lat > this.model.range.latMax ) {
+            throw new Error('Latitude is out of model bounds');
+        } else if ( lon < this.model.range.lonMin || lat > this.model.range.lonMax ) {
+            throw new Error('Longitude is out of model bounds');
         }
 
         // Remap set lat/lon to NOAA grads-friendly values.
@@ -109,9 +116,12 @@ class Grads {
 
 
     increment( hours ) {
+        this.incrementCounter++;
         this.offset = this.offset + ( hours || 1 );
         this.time = moment().utc().subtract(this.offset, 'hours');
         this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
+
+        //console.log( 'Time Travel Iteration: ' + this.incrementCounter );
     }
 
 
@@ -292,7 +302,7 @@ class Grads {
        var url = this.build( variable, includeAlt );
 
        // Debug:
-       // console.log(url);
+       console.log(url);
 
        request( url, function( error, response, body ) {
            self.counter++;

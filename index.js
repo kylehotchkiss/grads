@@ -14,28 +14,32 @@ var conditions = require("./library/conditions.js");
 app.use( express.static('public') );
 
 app.get('/conditions/:lat/:lon/:alt/:model?', function ( req, res ) {
-    var target = new conditions( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
+    try {
+        var target = new conditions( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
 
-    target.temp(function( temp ) {
-        target.wind(function( speed, heading ) {
-            res.json({
-                conditions: {
-                    temp: temp,
-                    windSpeed: speed,
-                    windHeading: heading
-                },
-                meta: {
-                    requested: {
-                        lat: req.params.lat,
-                        lon: req.params.lon,
-                        alt: req.params.alt
+        target.temp(function( temp ) {
+            target.wind(function( speed, heading ) {
+                res.json({
+                    conditions: {
+                        temp: temp,
+                        windSpeed: speed,
+                        windHeading: heading
                     },
-                    actual: {},
-                    grads: {},
-                }
+                    meta: {
+                        requested: {
+                            lat: req.params.lat,
+                            lon: req.params.lon,
+                            alt: req.params.alt
+                        },
+                        actual: {},
+                        grads: {},
+                    }
+                });
             });
         });
-    });
+    } catch ( error ) {
+        res.json({ status: 'error'});
+    }
 });
 
 app.get('/sea/:lat/:lon', function ( req, res ) {

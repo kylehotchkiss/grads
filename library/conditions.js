@@ -25,13 +25,13 @@ class Conditions extends Grads {
             self.fetch( "ugrd", true, function( ucomp ) {
                 var uwind, vwind;
 
-                if ( typeof vcomp[0][0] === "object" ) {
+                if ( typeof vcomp[0][0] === "object" && vcomp[0][0] ) {
                     vwind = vcomp[0][0][0];
                 } else {
                     vwind = vcomp[0][0];
                 }
 
-                if ( typeof ucomp[0][0] === "object" ) {
+                if ( typeof ucomp[0][0] === "object" && ucomp[0][0] ) {
                     uwind = ucomp[0][0][0];
                 } else {
                     uwind = ucomp[0][0];
