@@ -8,15 +8,15 @@
 var express = require('express');
 var app = express();
 
-var grads = require('./library/grads.js');
-var sea = require('./library/abstractions/sea.js');
-var conditions = require("./library/conditions.js");
+var Grads = require('./library/grads.js');
+var Sea = require('./library/abstractions/sea.js');
+var Conditions = require("./library/conditions.js");
 
 app.use( express.static('public') );
 
 app.get('/conditions/:lat/:lon/:alt/:model?', function ( req, res ) {
     try {
-        var target = new conditions( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
+        var target = new Conditions( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
 
         target.temp(function( temp ) {
             target.wind(function( speed, heading ) {
@@ -44,7 +44,7 @@ app.get('/conditions/:lat/:lon/:alt/:model?', function ( req, res ) {
 });
 
 app.get('/sea/:lat/:lon', function ( req, res ) {
-    var target = new sea( req.params.lat, req.params.lon );
+    var target = new Sea( req.params.lat, req.params.lon );
 
     console.time("Catching some Waves");
     target.wavesDetail(function( results ) {
@@ -55,7 +55,7 @@ app.get('/sea/:lat/:lon', function ( req, res ) {
 
 app.get('/ranged/:lat/:lon/:alt/:model?', function ( req, res ) {
     try {
-        var target = new grads( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
+        var target = new Grads( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
 
         target.fetch( "tmpsfc", false, function( values, key ) {
             res.json({ status: 'success', data: { values: values, key: key }});
