@@ -8,6 +8,7 @@
 var express = require('express');
 var app = express();
 
+var grads = require('./library/grads.js');
 var sea = require('./library/abstractions/sea.js');
 var conditions = require("./library/conditions.js");
 
@@ -38,7 +39,7 @@ app.get('/conditions/:lat/:lon/:alt/:model?', function ( req, res ) {
             });
         });
     } catch ( error ) {
-        res.json({ status: 'error'});
+        res.json({ status: 'error', message: error.message });
     }
 });
 
@@ -50,6 +51,18 @@ app.get('/sea/:lat/:lon', function ( req, res ) {
         console.timeEnd("Catching some Waves");
         res.json( results );
     });
+});
+
+app.get('/ranged/:lat/:lon/:alt/:model?', function ( req, res ) {
+    try {
+        var target = new grads( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
+
+        target.fetch( "tmpsfc", false, function( values, key ) {
+            res.json({ status: 'success', data: { values: values, key: key }});
+        });
+    } catch ( error ) {
+        res.json({ status: 'error', message: error.message });
+    }
 });
 
 

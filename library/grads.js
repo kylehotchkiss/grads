@@ -26,16 +26,28 @@ var remap = function( value, from, to, strict ) {
 
 //
 // Hacky code to build and add to multidimesional arrays
+// This literally builds strings for objects and evals them
+// This is likely the largest speed issue in the entire app
 //
 var mdsave = function( values, indexes, value ) {
     var cmd = "values";
 
-    for ( var i in indexes ) {
-        var index = indexes[i];
+    if ( Array.isArray( value ) ) {
+        var temp = {};
+
+        for ( var i in value ) {
+            temp[ String(i) ] = value[i];
+        }
+
+        value = JSON.stringify(temp);
+    }
+
+    for ( var j in indexes ) {
+        var index = indexes[j];
 
         cmd += '[' + index + ']';
 
-        if ( parseInt( i ) === ( indexes.length - 1 ) ) {
+        if ( parseInt( j ) === ( indexes.length - 1 ) ) {
             eval( cmd + " = " + value );
         } else if ( eval( "typeof " + cmd ) === "undefined" ) {
             eval( cmd + " = {}" );
@@ -56,7 +68,15 @@ var parameters = function() {
     for ( var i in arguments ) {
         var param = arguments[i];
 
-        output += "[" + param + "]";
+        if ( Array.isArray( param ) ) {
+            if ( param.length === 1 ) {
+                output += "[" + param[0] + "]";
+            } else {
+                output += "[" + param[0] + ':' + param[1] + "]";
+            }
+        } else {
+            output += "[" + param + "]";
+        }
     }
 
     return output;
@@ -66,11 +86,10 @@ var parameters = function() {
 //
 // Get Regex matches for a given string and regex.
 //
-//
 var matches = function( string, regex, index ) {
-    var i = index || 1;
     var match;
     var matches = [];
+    var i = index || 1;
 
     while ( match = regex.exec( string ) ) {
         matches.push( match[ i ] );
@@ -122,11 +141,13 @@ class Grads {
         }
 
         if ( alt.indexOf(':') !== -1 ) {
-            alt = alt.split(':');
+            //alt = alt.split(':');
 
-            if ( parseFloat(alt[0]) > parseFloat(alt[1]) ) {
-                throw new Error('Smaller Altitude must occur first in range');
-            }
+            //if ( parseFloat(alt[0]) > parseFloat(alt[1]) ) {
+            //    throw new Error('Smaller Altitude must occur first in range');
+            //}
+
+            throw new Error('Altitude sets are not currently supported due to Grads complexities');
         } else {
             alt = [ alt ];
         }
@@ -154,7 +175,7 @@ class Grads {
                 throw new Error('Longitude is out of model bounds');
             }
 
-            this.lon.push( remap( lon, [ this.model.range.lonMin, this.model.range.lonMax ], [ 0, this.model.steps.lon ], true ) );
+            this.lon.push( remap( lon[k], [ this.model.range.lonMin, this.model.range.lonMax ], [ 0, this.model.steps.lon ], true ) );
         }
 
         this.alt = alt;
@@ -176,33 +197,33 @@ class Grads {
 
         if ( includeAlt ) {
             if ( this.model.options.fidelity === "low" ) { // GFS
-                if ( this.alt < 1829 ) {
+                if ( this.alt[0] < 1829 ) {
                     altitude = "_1829m";
-                } else if ( this.alt >= 1829 && this.alt < 2743 ) {
+                } else if ( this.alt[0] >= 1829 && this.alt[0] < 2743 ) {
                     altitude = "_2743m";
-                } else if ( this.alt >= 2743 && this.alt < 3658 ) {
+                } else if ( this.alt[0] >= 2743 && this.alt[0] < 3658 ) {
                     altitude = "_3658m";
-                } if ( this.alt >= 3658 && this.alt < 25908 ) {
-                    level = remap( this.alt, [ 3658, 25908 ], [ 0, this.model.steps.alt ], true );
+                } if ( this.alt[0] >= 3658 && this.alt[0] < 25908 ) {
+                    level = remap( this.alt[0], [ 3658, 25908 ], [ 0, this.model.steps.alt ], true );
                     altitude = "prs";
-                } else if ( this.alt >= 25908 && this.alt < 44307 ) {
+                } else if ( this.alt[0] >= 25908 && this.alt[0] < 44307 ) {
                     altitude = "30_0mb";
                 }
             } else { // RAP and GFSHD
-                if ( this.alt < 12000 ) {
-                    level = remap( this.alt, [ 0, 12000 ], [ 0, this.model.steps.alt ], true );
+                if ( this.alt[0] < 12000 ) {
+                    level = remap( this.alt[0], [ 0, 12000 ], [ 0, this.model.steps.alt ], true );
                     altitude = "prs";
-                } else if ( this.alt >= 12000 && this.alt < 14000 ) {
+                } else if ( this.alt[0] >= 12000 && this.alt[0] < 14000 ) {
                     altitude = "180_150mb";
-                } else if ( this.alt >= 14000 && this.alt < 15000 ) {
+                } else if ( this.alt[0] >= 14000 && this.alt[0] < 15000 ) {
                     altitude = "150_120mb";
-                } else if ( this.alt >= 15000 && this.alt < 17000 ) {
+                } else if ( this.alt[0] >= 15000 && this.alt[0] < 17000 ) {
                     altitude = "120_90mb";
-                } else if ( this.alt >= 17000 && this.alt < 19000 ) {
+                } else if ( this.alt[0] >= 17000 && this.alt[0] < 19000 ) {
                     altitude = "90_60mb";
-                } else if ( this.alt >= 19000 && this.alt < 24000 ) {
+                } else if ( this.alt[0] >= 19000 && this.alt[0] < 24000 ) {
                     altitude = "60_30mb";
-                } else if ( this.alt >= 24000 ) {
+                } else if ( this.alt[0] >= 24000 ) {
                     altitude = "30_0mb";
                 }
             }
@@ -256,9 +277,9 @@ class Grads {
      *
      */
     parse( content, callback, timetravel ) {
-        var key, line, comma, value, indexes;
+        var key;
         var lines = content.split("\n");
-        var counter = /\[(\d)\]/g;
+        var counter = /\[(\d*)\]/g;
         var variables = {};
         var values = {};
 
@@ -272,7 +293,7 @@ class Grads {
         } else {
             // Capture all values and their array location
             for ( var i = 1; i < lines.length; i++ ) {
-                line = lines[i];
+                var line = lines[i];
 
                 // Stop looping when we hit the 3 blanks spaces
                 // that GrADS uses to seperate values from key
@@ -286,17 +307,28 @@ class Grads {
 
                     break;
                 } else {
-                    comma = line.indexOf(",");
-                    indexes = line.substring(0, comma);
+                    if ( line !== '' ) {
+                        var value = [];
+                        var comma = line.indexOf(",");
+                        var indexes = line.substring(0, comma);
 
-                    if ( line.substring( comma + 2 ) === "9.999E20" ) {
-                        // console.warn("Fill value detected! Verify accuracy of parameters and URL");
-                        value = null;
-                    } else {
-                        value = parseFloat(line.substring( comma + 2 ));
+                        if ( line.substring( comma + 2 ) === "9.999E20" ) {
+                            // console.warn("Fill value detected! Verify accuracy of parameters and URL");
+                            value = [ null ];
+                        } else {
+                            if ( line.substring( comma + 2 ).indexOf(',') !== -1 ) {
+                                let entries = line.substring( comma + 2 ).split(',');
+
+                                for ( var j in entries ) {
+                                    value.push( parseFloat( entries[j] ));
+                                }
+                            } else {
+                                value.push( parseFloat( line.substring( comma + 2 ) ) );
+                            }
+                        }
+
+                        values = mdsave( values, matches( indexes, counter ), value );
                     }
-
-                    values = mdsave( values, matches( indexes, counter ), value );
                 }
             }
 

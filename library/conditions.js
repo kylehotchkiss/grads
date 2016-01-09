@@ -2,7 +2,7 @@
 'use strict';
 var Grads = require('./grads.js');
 
-var RADIANS = Math.PI / 180;
+//var RADIANS = Math.PI / 180;
 var DEGREES = 180 / Math.PI;
 
 var ktof = function( k ) {
@@ -21,7 +21,7 @@ class Conditions extends Grads {
     wind( callback ) {
         var self = this;
 
-        self.fetch( "vgrd", true, function( vcomp, variables ) {
+        self.fetch( "vgrd", true, function( vcomp ) {
             self.fetch( "ugrd", true, function( ucomp ) {
                 var uwind, vwind;
 
@@ -48,8 +48,8 @@ class Conditions extends Grads {
     temp( callback ) {
         var self = this;
 
-        self.fetch( "tmpsfc", false, function( variable ) {
-            callback( ktof( variable[0][0] ) );
+        self.fetch( "tmpsfc", false, function( values ) {
+            callback( ktof( values[0][0][0] ) );
         });
     }
 }
