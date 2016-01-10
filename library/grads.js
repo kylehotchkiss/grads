@@ -448,8 +448,6 @@ class Grads {
                 }
             }
 
-            console.log( JSON.stringvalues );
-
             // console.log( 'Requests:' + this.counter );
             callback( values );
         }
