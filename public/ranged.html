@@ -10,9 +10,16 @@
         <script src="https://api.mapbox.com/mapbox.js/v2.2.3/mapbox.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
         <script>
-            jQuery(function() {
-                jQuery.ajax({ url: '/ranged/26.3:30.4/80.3:88/0', success: function( response ) {
 
+            jQuery(function() {
+                L.mapbox.accessToken = 'pk.eyJ1Ijoia3lsZWhvdGNoa2lzcyIsImEiOiJrTUJ4M0NzIn0.4yBXlPfoO1B2T1rnudXr_w';
+
+                var map = L.mapbox.map('map', 'mapbox.satellite')
+                    .setView([26.5333, 86.7333], 9);
+
+
+                jQuery.ajax({ url: '/ranged/26.3:30.4/80.3:88/0', success: function( response ) {
+                    var points = [];
                     var data = response.data;
                     var html = '<table>';
 
@@ -29,8 +36,14 @@
                                 // The latitude value: values[0][0][0]
                                 // Data layer
 
-                                var kelvin = parseFloat(data.values[i][index][k]);
+                                var kelvin = parseFloat(data.values[i][index][k].value);
                                 var english = ( kelvin - 273.15 ) * 1.8000 + 32.00;
+
+                                points.push({
+                                    type: 'Feature',
+                                    "properties": { "text": english.toFixed(0) + 'deg' },
+                                    "geometry": { "type": "Point", "coordinates": [ data.values[i][index][k].lon, data.values[i][index][k].lat ]}
+                                });
 
                                 html += '<td>' + english.toFixed(0) + '</td>';
                             }
@@ -41,6 +54,19 @@
 
                     html += '</table>'
                     jQuery('.js-table-output').html( html );
+
+                    L.geoJson(points, {
+                        pointToLayer: function(feature, ll) {
+                            return L.marker(ll, {
+                                icon: L.divIcon({
+                                    className: 'label',
+                                    html: feature.properties.text,
+                                    iconSize: [100, 40]
+                                })
+                            });
+                        }
+                    }).addTo(map);
+
                 }});
             });
         </script>
@@ -66,6 +92,7 @@
                     <article>
                         <section>
                             <h1>Grads: Ranged Test</h1>
+                            <div id="map" class="map"></div>
                         </section>
                     </article>
 

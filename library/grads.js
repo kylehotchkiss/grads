@@ -345,7 +345,7 @@ class Grads {
                 if ( line.indexOf("[") !== -1 && line.indexOf("]") !== -1 ) {
                     var refvalues = [];
                     var refcomma = line.indexOf(",");
-                    var variable = line.substring(0, refcomma);
+                    var refname = line.substring(0, refcomma);
 
                     if ( lines[ j + 1 ].indexOf(',') !== -1 ) {
                         // Data is 3D
@@ -359,7 +359,7 @@ class Grads {
                     }
 
                     // Lightly process variables
-                    if ( variable === "time" ) {
+                    if ( refname === "time" ) {
                         // GrADS time is days since 1-1-1
                         // Set days since to Unix Epoch
 
@@ -376,24 +376,82 @@ class Grads {
                             // console.log( moment( refvalues[l] ).format() );
                             // console.log( "Difference - " + moment().diff(moment( refvalues[l] ), 'minutes') + " minutes");
                         }
-                    } else if ( variable === 'lon' && this.model.options.degreeseast ) {
+                    } else if ( refname === 'lon' && this.model.options.degreeseast ) {
                         // Make sure longitudes > 180 become negative values
-                        for ( var n in refvalues ) {
-                            if ( refvalues[n] > 180 ) {
-                                refvalues[n] = -1 * ( 360 - refvalues[n] );
+                        for ( var m in refvalues ) {
+                            if ( refvalues[m] > 180 ) {
+                                refvalues[m] = -1 * ( 360 - refvalues[m] );
                             }
                         }
                     }
 
-                    variables[ variable ] = refvalues;
+                    variables[ refname ] = refvalues;
 
                     // Skip the value line
                     j++;
                 }
             }
 
+            //
+            // Apply variables to values so we can associate data with reality
+            // This is so stupid complicated and harded coded but my mind is
+            // fried from spending a day of my free time working with "multidimesional"
+            // arrays which is pretty much as out of body experience as you can get
+            //
+            var timeRef, altRef, latRef, lonRef, primed;
+            for ( var n in values ) {
+                for ( var o in values[n] ) {
+                    for ( var p in values[n][o] ) {
+                        if ( typeof p === 'object' ) {
+                            for ( var q in values[n][o][p] ) {
+                                timeRef = n;
+                                altRef = o;
+                                latRef = p;
+                                lonRef = q;
+                                primed = { value: values[n][o][p][q] }; // haha
+
+                                for ( var r in variables ) {
+                                    if ( r === 'time' ) {
+                                        primed.time = variables[r][timeRef];
+                                    } else if ( r === 'alt' ) {
+                                        primed.alt = variables[r][altRef];
+                                    } else if ( r === 'lat' ) {
+                                        primed.lat = variables[r][latRef];
+                                    } else if ( r === 'lon' ) {
+                                        primed.lon = variables[r][lonRef];
+                                    }
+                                }
+
+                                values[n][o][p][q] = primed;
+                            }
+                        } else {
+                            timeRef = n;
+                            latRef = o;
+                            lonRef = p;
+                            primed = { value: values[n][o][p] }; // haha
+
+                            for ( var r in variables ) {
+                                if ( r === 'time' ) {
+                                    primed.time = variables[r][timeRef];
+                                } else if ( r === 'alt' ) {
+                                    primed.alt = variables[r][altRef];
+                                } else if ( r === 'lat' ) {
+                                    primed.lat = variables[r][latRef];
+                                } else if ( r === 'lon' ) {
+                                    primed.lon = variables[r][lonRef];
+                                }
+                            }
+
+                            values[n][o][p] = primed;
+                        }
+                    }
+                }
+            }
+
+            console.log( JSON.stringvalues );
+
             // console.log( 'Requests:' + this.counter );
-            callback( values, variables );
+            callback( values );
         }
    }
 

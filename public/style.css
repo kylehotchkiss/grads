@@ -24,3 +24,13 @@ p {
     cursor: pointer;
     height: 450px;
 }
+
+.leaflet-marker-icon {
+    width: 50px !important;
+    height: 15px !important;
+    padding: 3px;
+    font-weight: bold;
+    font-size: 8px;
+    background-color: black;
+    font-family: monospace;
+}
