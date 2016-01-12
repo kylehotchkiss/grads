@@ -1,5 +1,16 @@
-# grads
-This is the source code to a small API server that can be used to get simple data about wind for nearly any point on the globe, and many miles above it. It's based on NOAA's various weather data available in GrADS, which is a live but complex 3D grid dataset created for visualizations and predictions. I've found this data accurate enough for things like trajectory predictions for ballooning, and think it would be nice for other sorts of physics simulation work as well.
+# GrADS
+
+Javascript-based Grid Analysis and Display System (GrADS) software. Primarily an API for accessing weather forecast/climate data for a location or area. Currently, acccesses a few GFS variables but working to include the majority of human-usable variables (do you care about surface flux or gravity wave stuff? I don't!)
+
+Applications & Implementation ideas:
+
+* (originally) trajectory prediction for weather balloons & payloads
+* Access weather conditions via forecast (weather model, not sensors) for nearly any point on planet.
+* Access wave conditions for a majority of the water on the planet (weather model, not sensors)
+* Visualize weather conditions for an entire country at once. Quite interesting seeing this on poorer countries.
+* Potientally create a forecast broadcast system for small countries with a small decoding device.
+
+GrADS is a beast of a server to access. I've worked on this code for several years now and finally am comfortable that I'm doing it right. 
 
 # Usage
 Right now, the API only works for simple requests (single location). Access it like so -
