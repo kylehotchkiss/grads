@@ -163,10 +163,12 @@ var ForecastController = React.createClass({
         var self = this;
 
         let animationID = setInterval(() => {
-            let next = ( self.state.step < self.state.timeline.length ) ? self.state.step + 1 : 0;
+            requestAnimationFrame(() => {
+                let next = ( self.state.step < self.state.timeline.length ) ? self.state.step + 1 : 0;
 
-            self.setState({ step: next }, () => {
-                self.drawMap( false );
+                self.setState({ step: next }, () => {
+                    self.drawMap( false );
+                });
             });
         }, 750);
 
