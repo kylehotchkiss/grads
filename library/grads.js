@@ -259,7 +259,8 @@ class Grads {
         if ( typeof level === "number" ) {
             subset = parameters( offset, level, this.lat, this.lon );
         } else {
-            subset = parameters( offset, this.lat, this.lon );
+            //subset = parameters( offset, this.lat, this.lon );
+            subset = parameters( offset + ':' + ( offset + 20 ), this.lat, this.lon );
         }
 
         // Generate the entire URL, adding altitude if set
