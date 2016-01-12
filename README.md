@@ -1,6 +1,6 @@
 # GrADS
 
-Javascript-based Grid Analysis and Display System (GrADS) software. Primarily an API for accessing weather forecast/climate data for a location or area. Currently, acccesses a few GFS variables but working to include the majority of human-usable variables (do you care about surface flux or gravity wave stuff? I don't!)
+Javascript-based GrADS (Grid Analysis and Display System) Data Server client. Primarily an API for accessing weather forecast/climate data for a location or area. Currently, acccesses a few GFS variables but working to include the majority of human-usable variables (do you care about surface flux or gravity wave stuff? I don't!)
 
 Applications & Implementation ideas:
 
