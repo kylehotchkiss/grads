@@ -73,7 +73,8 @@ var parameters = function() {
             if ( param.length === 1 ) {
                 output += "[" + param[0] + "]";
             } else {
-                output += "[" + param[0] + ':' + param[1] + "]";
+                //output += "[" + param[0] + ':' + param[1] + "]";
+                output += "[" + param[0] + ':4:' + param[1] + "]";
             }
         } else {
             output += "[" + param + "]";
@@ -294,7 +295,6 @@ class Grads {
             timetravel();
         } else {
             // Capture all values and their array location
-            console.time( variable + ' first process');
             for ( var i = 1; i < lines.length; i++ ) {
                 var line = lines[i];
 
@@ -334,7 +334,6 @@ class Grads {
                     }
                 }
             }
-            console.timeEnd( variable + ' first process');
 
             if ( !key ) {
                 throw new Error('Checking for `time` variable inside of Grads response failed - unable to assign key names');
@@ -342,7 +341,6 @@ class Grads {
 
             // Capture all keys (references) and their array location
             // Can you tell I can't name variables well at this level of iteration yet?
-            console.time( variable + ' second process');
             for ( var j = key; j < lines.length; j++ ) {
                 line = lines[j];
 
@@ -396,7 +394,6 @@ class Grads {
                     j++;
                 }
             }
-            console.timeEnd( variable + ' second process');
 
             //
             // Apply variables to values so we can associate data with reality
@@ -404,7 +401,6 @@ class Grads {
             // fried from spending a day of my free time working with "multidimesional"
             // arrays which is pretty much as out of body experience as you can get
             //
-            console.time( variable + ' third process');
             var timeRef, altRef, latRef, lonRef, primed;
             for ( var n in values ) {
                 for ( var o in values[n] ) {
@@ -456,7 +452,6 @@ class Grads {
                     }
                 }
             }
-            console.timeEnd( variable + ' third process');
 
             // console.log( 'Requests:' + this.counter );
             callback( values );
@@ -475,7 +470,6 @@ class Grads {
        // Debug:
        //console.log( url );
 
-       console.time( variable + ' download' );
        request( url, function( error, response, body ) {
            self.counter++;
 
@@ -488,7 +482,6 @@ class Grads {
 
                // Wut to do?
            }
-           console.timeEnd( variable + ' download' );
        });
 
        // TODO:

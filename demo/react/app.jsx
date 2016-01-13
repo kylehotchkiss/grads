@@ -11,7 +11,6 @@ import Submittable from 'react-submittable';
 import { countries } from 'json!../data/countries.json';
 
 var ForecastController = React.createClass({
-
     getInitialState() {
         return {
             step: 0,
@@ -20,20 +19,23 @@ var ForecastController = React.createClass({
 
             country: '',
             pointsLayer: {},
+            metric: 'clouds',
             animationID: false
         };
     },
 
-    renderCountries() {
-        return countries.map(( country, i ) => {
-            return (
-                <option value={ i } key={ i }>{ country.name }</option>
-            );
-        });
+    color( value ) {
+        let colors = ['#67001f','#b2182b','#d6604d','#f4a582','#fddbc7','#d1e5f0','#92c5de','#4393c3','#2166ac','#053061'].reverse();
+        return colors[ Math.floor(( parseInt(value) / 100 ) * 10).toFixed(0) ];
     },
 
+
+    //////////////////
+    // INPUT EVENTS //
+    //////////////////
     clearCountry() {
         this.setState({
+            step: 0,
             country: ''
         }, () => {
             this.clearMap();
@@ -44,6 +46,7 @@ var ForecastController = React.createClass({
         this.endAnimation();
 
         this.setState({
+            step: 0,
             country: this.refs.country.value
         }, () => {
             this.requestPoints( this.refs.country.value );
@@ -60,10 +63,6 @@ var ForecastController = React.createClass({
         });
     },
 
-    color( value ) {
-        let colors = ['#67001f','#b2182b','#d6604d','#f4a582','#fddbc7','#d1e5f0','#92c5de','#4393c3','#2166ac','#053061'].reverse();
-        return colors[ Math.floor(( parseInt(value) / 100 ) * 10).toFixed(0) ];
-    },
 
     requestPoints( countryID ) {
         let country = countries[ countryID ];
@@ -78,34 +77,21 @@ var ForecastController = React.createClass({
                 let data = response.data;
 
                 if ( response.status === 'success' ) {
-                    for ( var i in data.values ) {
-                        // The time variable: values[0]
+                    for ( var i in data.values ) { // The time variable: values[0]
                         let points = [];
 
-                        for ( var j in data.values[i] ) { // reverse because smaller is lower
-                            // The latitude variable: values[0][0]
-
-                            for ( var k in data.values[i][j] ) {
-                                // The latitude value: values[0][0][0]
-                                // Data layer
-
-                                //var kelvin = parseFloat(data.values[i][j][k].tcdcclm);
-                                //var english = ( kelvin - 273.15 ) * 1.8000 + 32.00;
-                                var english = parseFloat(data.values[i][j][k].tcdcclm);
+                        for ( var j in data.values[i] ) { // The latitude variable: values[0][0]
+                            for ( var k in data.values[i][j] ) { // The latitude value: values[0][0][0]
 
                                 points.push({
                                     type: 'Feature',
-                                    properties: { text: english.toFixed(0) + 'deg', color: this.color( english.toFixed(0) ) },
-                                    geometry: { type: 'Point', coordinates: [ data.values[i][j][k].lon, data.values[i][j][k].lat ]}
+                                    properties: { values: data.values[i][j][k].values },
+                                    geometry: { type: 'Point', coordinates: [ data.values[i][j][k].lon, data.values[i][j][k].lat ] }
                                 });
                             }
                         }
 
-                        views.push({
-                            points: points,
-                            country: country,
-                        });
-
+                        views.push({ points: points, country: country });
                         timeline.push( data.values[i][0][0].time );
                     }
 
@@ -122,6 +108,10 @@ var ForecastController = React.createClass({
         }
     },
 
+
+    ////////////////////////
+    // MAPPING OPERATIONS //
+    ////////////////////////
     clearMap() {
         this.props.map.removeLayer( this.state.pointsLayer );
     },
@@ -133,19 +123,45 @@ var ForecastController = React.createClass({
         var country = this.state.views[ this.state.step ].country;
 
         let layer = L.geoJson(points, {
-            pointToLayer: function( feature ) {
-                return L.rectangle([[
-                    feature.geometry.coordinates[1] - 0.5,
-                    feature.geometry.coordinates[0] - 0.5
-                ], [
-                    feature.geometry.coordinates[1] + 0.5,
-                    feature.geometry.coordinates[0] + 0.5
-                ]], {
-                    weight: 0,
-                    clickable: false,
-                    fillOpacity: 0.1,
-                    fillColor: feature.properties.color
-                });
+            pointToLayer: feature => {
+                console.log( this.state.metric );
+                console.log( feature )
+
+                if ( this.state.metric === 'temperature' ) {
+                    var kelvin = parseFloat(feature.values.temperature);
+                    var english = ( kelvin - 273.15 ) * 1.8000 + 32.00;
+
+                    return L.rectangle([[
+                        feature.geometry.coordinates[1] - 0.5,
+                        feature.geometry.coordinates[0] - 0.5
+                    ], [
+                        feature.geometry.coordinates[1] + 0.5,
+                        feature.geometry.coordinates[0] + 0.5
+                    ]], {
+                        weight: 0,
+                        clickable: false,
+                        fillOpacity: 0.5,
+                        fillColor: this.color( english )
+                    });
+                } else if ( this.state.metric === 'clouds' ) {
+                    var cover = ( parseFloat( feature.properties.values.clouds ) / 100 ) * .5;
+
+                    console.log( feature.properties.values.clouds );
+                    console.log( cover );
+
+                    return L.rectangle([[
+                        feature.geometry.coordinates[1] - 0.5,
+                        feature.geometry.coordinates[0] - 0.5
+                    ], [
+                        feature.geometry.coordinates[1] + 0.5,
+                        feature.geometry.coordinates[0] + 0.5
+                    ]], {
+                        weight: 0,
+                        clickable: false,
+                        fillOpacity: cover,
+                        fillColor: '#000000'
+                    });
+                }
             }
         }).addTo( this.props.map );
 
@@ -158,6 +174,10 @@ var ForecastController = React.createClass({
         });
     },
 
+
+    ////////////////
+    // ANIMATIONS //
+    ////////////////
     startAnimation( event ) {
         event.preventDefault();
 
@@ -171,7 +191,7 @@ var ForecastController = React.createClass({
                     self.drawMap( false );
                 });
             });
-        }, 750);
+        }, 500);
 
         self.setState({
             animationID: animationID
@@ -187,6 +207,18 @@ var ForecastController = React.createClass({
             clearInterval( this.state.animationID );
             this.setState({ animationID: false });
         }
+    },
+
+
+    ////////////////
+    // COMPONENTS //
+    ////////////////
+    renderCountries() {
+        return countries.map(( country, i ) => {
+            return (
+                <option value={ i } key={ i }>{ country.name }</option>
+            );
+        });
     },
 
     renderRange() {
@@ -228,7 +260,7 @@ var ForecastController = React.createClass({
         return (
             <div className="row">
                 <div className="col-sm-4">
-                    <h3>Choose a country </h3>
+                    <h3>Choose a country</h3>
 
                     <Submittable onEnter={ this.changeCountry } onCancel={ this.clearCountry }>
                         <select ref="country" onChange={ this.changeCountry } defaultValue={ this.state.country }>

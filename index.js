@@ -58,14 +58,10 @@ app.get('/ranged/:lat/:lon/:alt/:model?', function ( req, res ) {
     try {
         var target = new Grads( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
 
-        console.time('Requests');
         target.fetch( "temperature", false, function( values_temp ) {
             target.fetch( "clouds", false, function( values_cloud ) {
                 target.fetch( "precipitation_rate", false, function( values_precipitation ) {
-                    console.timeEnd('Requests');
-                    console.time('Combine');
                     var values = _.merge( values_temp, values_cloud, values_precipitation );
-                    console.timeEnd('Combine');
                     res.json({ status: 'success', data: { values: values }});
                 });
             });

@@ -22,6 +22,29 @@
             "degreeseast": true
         }
     },
+    "gfs_medium": {
+        "name": "gfs",
+        "slug": "gfs_1p00",
+        "base": "http://nomads.ncep.noaa.gov:9090/dods/",
+        "range": {
+            "latMin": -90,
+            "latMax": 90,
+            "lonMin": 0,
+            "lonMax": 360
+        },
+        "steps": {
+            "lat": 181,
+            "lon": 360,
+            "alt": 26,
+            "days": 16,
+            "time": 33
+        },
+        "options": {
+            "fidelity": "low",
+            "quarterly": true,
+            "degreeseast": true
+        }
+    },
     "rap": {
         "name": "rap",
         "slug": "rap",
