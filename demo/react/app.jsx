@@ -89,8 +89,9 @@ var ForecastController = React.createClass({
                                 // The latitude value: values[0][0][0]
                                 // Data layer
 
-                                var kelvin = parseFloat(data.values[i][j][k].value);
-                                var english = ( kelvin - 273.15 ) * 1.8000 + 32.00;
+                                //var kelvin = parseFloat(data.values[i][j][k].tcdcclm);
+                                //var english = ( kelvin - 273.15 ) * 1.8000 + 32.00;
+                                var english = parseFloat(data.values[i][j][k].tcdcclm);
 
                                 points.push({
                                     type: 'Feature',

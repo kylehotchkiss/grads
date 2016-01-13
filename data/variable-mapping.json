@@ -1,0 +1,14 @@
+{
+    "gfs": {
+        "humidity": "rh2m",
+        "gusts": "gustsfc",
+        "clouds": "tcdcclm",
+        "wind_u": "ugrd2pv",
+        "wind_v": "vgrd2pv",
+        "dewpoint": "dpt2m",
+        "pressure": "pressfc",
+        "temperature": "tmpsfc",
+        "precipitation_rate": "pratesfc",
+        "precipitation_frozen": "cpofpsfc"
+    }
+}

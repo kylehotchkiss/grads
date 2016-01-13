@@ -7,7 +7,8 @@
 
 var moment = require('moment');
 var request = require('request');
-var models = { noaa: require("../data/noaa-models.json") };
+var dictionary = require('../data/variable-mapping.json').gfs;
+var models = { noaa: require('../data/noaa-models.json') };
 
 
 //
@@ -265,9 +266,9 @@ class Grads {
 
         // Generate the entire URL, adding altitude if set
         if ( altitude ) {
-           return this.model.base + model + variable + altitude + subset;
+           return this.model.base + model + ( dictionary[ variable ] || variable ) + altitude + subset;
         } else {
-           return this.model.base + model + variable + subset;
+           return this.model.base + model + ( dictionary[ variable ] || variable ) + subset;
         }
     }
 
@@ -277,7 +278,7 @@ class Grads {
      * Read the GrADS response and decode it
      *
      */
-    parse( content, callback, timetravel ) {
+    parse( variable, content, callback, timetravel ) {
         var key;
         var lines = content.split("\n");
         var counter = /\[(\d*)\]/g;
@@ -293,6 +294,7 @@ class Grads {
             timetravel();
         } else {
             // Capture all values and their array location
+            console.time( variable + ' first process');
             for ( var i = 1; i < lines.length; i++ ) {
                 var line = lines[i];
 
@@ -332,6 +334,7 @@ class Grads {
                     }
                 }
             }
+            console.timeEnd( variable + ' first process');
 
             if ( !key ) {
                 throw new Error('Checking for `time` variable inside of Grads response failed - unable to assign key names');
@@ -339,6 +342,7 @@ class Grads {
 
             // Capture all keys (references) and their array location
             // Can you tell I can't name variables well at this level of iteration yet?
+            console.time( variable + ' second process');
             for ( var j = key; j < lines.length; j++ ) {
                 line = lines[j];
 
@@ -392,6 +396,7 @@ class Grads {
                     j++;
                 }
             }
+            console.timeEnd( variable + ' second process');
 
             //
             // Apply variables to values so we can associate data with reality
@@ -399,6 +404,7 @@ class Grads {
             // fried from spending a day of my free time working with "multidimesional"
             // arrays which is pretty much as out of body experience as you can get
             //
+            console.time( variable + ' third process');
             var timeRef, altRef, latRef, lonRef, primed;
             for ( var n in values ) {
                 for ( var o in values[n] ) {
@@ -409,7 +415,8 @@ class Grads {
                                 altRef = o;
                                 latRef = p;
                                 lonRef = q;
-                                primed = { value: values[n][o][p][q] }; // haha
+                                primed = { values: {} };
+                                primed.values[ variable ] = values[n][o][p][q];
 
                                 for ( var r in variables ) {
                                     if ( r === 'time' ) {
@@ -429,7 +436,8 @@ class Grads {
                             timeRef = n;
                             latRef = o;
                             lonRef = p;
-                            primed = { value: values[n][o][p] }; // haha
+                            primed = { values: {} };
+                            primed.values[ variable ] = values[n][o][p]
 
                             for ( var r in variables ) {
                                 if ( r === 'time' ) {
@@ -448,6 +456,7 @@ class Grads {
                     }
                 }
             }
+            console.timeEnd( variable + ' third process');
 
             // console.log( 'Requests:' + this.counter );
             callback( values );
@@ -466,11 +475,12 @@ class Grads {
        // Debug:
        //console.log( url );
 
+       console.time( variable + ' download' );
        request( url, function( error, response, body ) {
            self.counter++;
 
            if ( !error ) {
-               self.parse( body, callback, function() {
+               self.parse( variable, body, callback, function() {
                     // Time Travel
                     self.increment();
                     self.fetch( variable, includeAlt, callback );
@@ -478,6 +488,7 @@ class Grads {
 
                // Wut to do?
            }
+           console.timeEnd( variable + ' download' );
        });
 
        // TODO:
