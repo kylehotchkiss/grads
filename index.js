@@ -61,8 +61,10 @@ app.get('/ranged/:lat/:lon/:alt/:model?', function ( req, res ) {
         target.fetch( "temperature", false, function( values_temp ) {
             target.fetch( "clouds", false, function( values_cloud ) {
                 target.fetch( "precipitation_rate", false, function( values_precipitation ) {
-                    var values = _.merge( values_temp, values_cloud, values_precipitation );
-                    res.json({ status: 'success', data: { values: values }});
+                    target.fetch( "precipitation_frozen", false, function( values_precipitation_frozen ) {
+                        var values = _.merge( values_temp, values_cloud, values_precipitation, values_precipitation_frozen );
+                        res.json({ status: 'success', data: { values: values }});
+                    });
                 });
             });
         });

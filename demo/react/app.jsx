@@ -5,6 +5,7 @@ import React from 'react';
 import jQuery from 'jquery';
 import Moment from 'moment';
 import ReactDOM from 'react-dom';
+import Loader from 'react-loader';
 
 import Range from 'react-range';
 import Submittable from 'react-submittable';
@@ -18,6 +19,7 @@ var ForecastController = React.createClass({
             timeline: [],
 
             country: '',
+            loaded: true,
             pointsLayer: {},
             metric: 'clouds',
             animationID: false
@@ -63,6 +65,14 @@ var ForecastController = React.createClass({
         });
     },
 
+    changeMetric( metric ) {
+        this.setState({
+            metric: metric
+        }, () => {
+            this.drawMap();
+        })
+    },
+
 
     requestPoints( countryID ) {
         let country = countries[ countryID ];
@@ -70,6 +80,8 @@ var ForecastController = React.createClass({
         if ( typeof country === 'object' ) {
             let lat = country.latMin + ':' + country.latMax;
             let lon = country.lonMin + ':' + country.lonMax;
+
+            this.setState({ loaded: false });
 
             jQuery.ajax({ url: `/ranged/${lat}/${lon}/0`, success: response => {
                 let views = [];
@@ -96,6 +108,7 @@ var ForecastController = React.createClass({
                     }
 
                     this.setState({
+                        loaded: true,
                         views: views,
                         timeline: timeline
                     }, () => {
@@ -124,11 +137,8 @@ var ForecastController = React.createClass({
 
         let layer = L.geoJson(points, {
             pointToLayer: feature => {
-                console.log( this.state.metric );
-                console.log( feature )
-
                 if ( this.state.metric === 'temperature' ) {
-                    var kelvin = parseFloat(feature.values.temperature);
+                    var kelvin = parseFloat(feature.properties.values.temperature);
                     var english = ( kelvin - 273.15 ) * 1.8000 + 32.00;
 
                     return L.rectangle([[
@@ -146,8 +156,6 @@ var ForecastController = React.createClass({
                 } else if ( this.state.metric === 'clouds' ) {
                     var cover = ( parseFloat( feature.properties.values.clouds ) / 100 ) * .5;
 
-                    console.log( feature.properties.values.clouds );
-                    console.log( cover );
 
                     return L.rectangle([[
                         feature.geometry.coordinates[1] - 0.5,
@@ -270,14 +278,32 @@ var ForecastController = React.createClass({
                     </Submittable>
                 </div>
 
-                <div className="col-sm-4">
-                    <h3>Choose a time</h3>
-                    { this.renderRange() }
-                </div>
+                <div className="col-sm-8">
+                    <Loader loaded={this.state.loaded} top="0" scale={.85}>
+                        <div className="row">
+                            <div className="col-sm-6">
+                                <h3>Choose a time</h3>
+                                { this.renderRange() }
+                            </div>
 
-                <div className="col-sm-4">
-                    <h3>Controls</h3>
-                    { this.renderAnimationControl() }
+                            <div className="col-sm-6">
+                                <h3>Controls</h3>
+                                { this.renderAnimationControl() }
+
+                                <div className="metrics">
+                                    <div onClick={ this.changeMetric.bind( this, 'temperature') }
+                                        className={ this.state.metric === 'temperature' ? 'selected' : '' }>
+                                        Temperature
+                                    </div>
+
+                                    <div onClick={ this.changeMetric.bind( this, 'clouds') }
+                                        className={ this.state.metric === 'clouds' ? 'selected' : '' }>
+                                        Clouds
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </Loader>
                 </div>
             </div>
         );

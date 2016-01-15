@@ -24,3 +24,12 @@ p {
     cursor: pointer;
     height: 450px;
 }
+
+.loader {
+    margin-top: 50px;
+    position: relative;
+}
+
+.metrics .selected {
+    font-weight: bold;
+}
