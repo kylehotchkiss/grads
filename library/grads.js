@@ -5,6 +5,8 @@
 
 'use strict';
 
+var _ = require('lodash');
+var async = require('async');
 var moment = require('moment');
 var request = require('request');
 var dictionary = require('../data/variable-mapping.json').gfs;
@@ -73,8 +75,8 @@ var parameters = function() {
             if ( param.length === 1 ) {
                 output += "[" + param[0] + "]";
             } else {
-                //output += "[" + param[0] + ':' + param[1] + "]";
-                output += "[" + param[0] + ':4:' + param[1] + "]";
+                output += "[" + param[0] + ':' + param[1] + "]";
+                //output += "[" + param[0] + ':4:' + param[1] + "]";
             }
         } else {
             output += "[" + param + "]";
@@ -487,6 +489,32 @@ class Grads {
        // TODO:
        // - Cache responses via Redis for 1 hour
    }
+
+   /**
+    *
+    * Bulk fetch: grab multiple variables in parallel
+    * Merge datasets together
+    *
+    */
+    bulkFetch( variables, callback ) {
+        async.map( variables, ( variable, callback ) => {
+            console.time(variable);
+            this.fetch( variable, false, values => {
+                console.timeEnd(variable);
+                callback( false, values );
+            });
+        }, ( error, results ) => {
+            if ( !error ) {
+                var ensemble = [];
+
+                for ( var i in results ) {
+                    _.merge(ensemble, results[i]);
+                }
+
+                callback( ensemble );
+            }
+        });
+    }
 }
 
 module.exports = Grads;

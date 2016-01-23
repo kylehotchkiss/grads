@@ -54,19 +54,12 @@ app.get('/sea/:lat/:lon', function ( req, res ) {
     });
 });
 
-app.get('/ranged/:lat/:lon/:alt/:model?', function ( req, res ) {
+app.get('/weather/visualize/:lat/:lon/:alt/:model?', function ( req, res ) {
     try {
-        var target = new Grads( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
+        var target = new Weather( req.params.lat, req.params.lon, ( req.params.alt || 0 ) );
 
-        target.fetch( "temperature", false, function( values_temp ) {
-            target.fetch( "clouds", false, function( values_cloud ) {
-                target.fetch( "precipitation_rate", false, function( values_precipitation ) {
-                    target.fetch( "precipitation_frozen", false, function( values_precipitation_frozen ) {
-                        var values = _.merge( values_temp, values_cloud, values_precipitation, values_precipitation_frozen );
-                        res.json({ status: 'success', data: { values: values }});
-                    });
-                });
-            });
+        target.visualize(weather, values => {
+            res.json({ status: 'success', data: { values: values }});
         });
     } catch ( error ) {
         res.json({ status: 'error', message: error.message });

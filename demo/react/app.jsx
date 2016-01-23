@@ -142,11 +142,11 @@ var ForecastController = React.createClass({
                     var english = ( kelvin - 273.15 ) * 1.8000 + 32.00;
 
                     return L.rectangle([[
-                        feature.geometry.coordinates[1] - 0.5,
-                        feature.geometry.coordinates[0] - 0.5
+                        feature.geometry.coordinates[1] - 0.125,
+                        feature.geometry.coordinates[0] - 0.125
                     ], [
-                        feature.geometry.coordinates[1] + 0.5,
-                        feature.geometry.coordinates[0] + 0.5
+                        feature.geometry.coordinates[1] + 0.125,
+                        feature.geometry.coordinates[0] + 0.125
                     ]], {
                         weight: 0,
                         clickable: false,
@@ -155,7 +155,6 @@ var ForecastController = React.createClass({
                     });
                 } else if ( this.state.metric === 'clouds' ) {
                     var cover = ( parseFloat( feature.properties.values.clouds ) / 100 ) * .5;
-
 
                     return L.rectangle([[
                         feature.geometry.coordinates[1] - 0.5,
@@ -168,6 +167,21 @@ var ForecastController = React.createClass({
                         clickable: false,
                         fillOpacity: cover,
                         fillColor: '#000000'
+                    });
+                } else if ( this.state.metric === 'snow' ) {
+                    var cover = (( parseFloat( feature.properties.values.snow_depth ) * 3.28084 ) / 2) * .5;
+
+                    return L.rectangle([[
+                        feature.geometry.coordinates[1] - 0.125,
+                        feature.geometry.coordinates[0] - 0.125
+                    ], [
+                        feature.geometry.coordinates[1] + 0.125,
+                        feature.geometry.coordinates[0] + 0.125
+                    ]], {
+                        weight: 0,
+                        clickable: false,
+                        fillOpacity: cover,
+                        fillColor: '#0000FF'
                     });
                 }
             }
@@ -299,6 +313,11 @@ var ForecastController = React.createClass({
                                     <div onClick={ this.changeMetric.bind( this, 'clouds') }
                                         className={ this.state.metric === 'clouds' ? 'selected' : '' }>
                                         Clouds
+                                    </div>
+
+                                    <div onClick={ this.changeMetric.bind( this, 'snow') }
+                                        className={ this.state.metric === 'snow' ? 'selected' : '' }>
+                                        Snow
                                     </div>
                                 </div>
                             </div>
