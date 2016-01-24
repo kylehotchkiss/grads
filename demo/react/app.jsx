@@ -15,14 +15,15 @@ var ForecastController = React.createClass({
     getInitialState() {
         return {
             step: 0,
-            views: [],
-            timeline: [],
-
             country: '',
             loaded: true,
-            pointsLayer: {},
             metric: 'clouds',
-            animationID: false
+            animationID: false,
+
+            views: [],
+            timeline: [],
+            gradsConfig: {},
+            pointsLayer: {},
         };
     },
 
@@ -110,7 +111,8 @@ var ForecastController = React.createClass({
                     this.setState({
                         loaded: true,
                         views: views,
-                        timeline: timeline
+                        timeline: timeline,
+                        gradsConfig: data.config,
                     }, () => {
                         this.drawMap();
                     });
@@ -142,11 +144,11 @@ var ForecastController = React.createClass({
                     var english = ( kelvin - 273.15 ) * 1.8000 + 32.00;
 
                     return L.rectangle([[
-                        feature.geometry.coordinates[1] - 0.125,
-                        feature.geometry.coordinates[0] - 0.125
+                        feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
+                        feature.geometry.coordinates[0] - (this.state.gradsConfig.resolution / 2)
                     ], [
-                        feature.geometry.coordinates[1] + 0.125,
-                        feature.geometry.coordinates[0] + 0.125
+                        feature.geometry.coordinates[1] + (this.state.gradsConfig.resolution / 2),
+                        feature.geometry.coordinates[0] + (this.state.gradsConfig.resolution / 2)
                     ]], {
                         weight: 0,
                         clickable: false,
@@ -157,11 +159,11 @@ var ForecastController = React.createClass({
                     var cover = ( parseFloat( feature.properties.values.clouds ) / 100 ) * .5;
 
                     return L.rectangle([[
-                        feature.geometry.coordinates[1] - 0.5,
-                        feature.geometry.coordinates[0] - 0.5
+                        feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
+                        feature.geometry.coordinates[0] - (this.state.gradsConfig.resolution / 2)
                     ], [
-                        feature.geometry.coordinates[1] + 0.5,
-                        feature.geometry.coordinates[0] + 0.5
+                        feature.geometry.coordinates[1] + (this.state.gradsConfig.resolution / 2),
+                        feature.geometry.coordinates[0] + (this.state.gradsConfig.resolution / 2)
                     ]], {
                         weight: 0,
                         clickable: false,
@@ -172,11 +174,11 @@ var ForecastController = React.createClass({
                     var cover = (( parseFloat( feature.properties.values.snow_depth ) * 3.28084 ) / 2) * .5;
 
                     return L.rectangle([[
-                        feature.geometry.coordinates[1] - 0.125,
-                        feature.geometry.coordinates[0] - 0.125
+                        feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
+                        feature.geometry.coordinates[0] - (this.state.gradsConfig.resolution / 2)
                     ], [
-                        feature.geometry.coordinates[1] + 0.125,
-                        feature.geometry.coordinates[0] + 0.125
+                        feature.geometry.coordinates[1] + (this.state.gradsConfig.resolution / 2),
+                        feature.geometry.coordinates[0] + (this.state.gradsConfig.resolution / 2)
                     ]], {
                         weight: 0,
                         clickable: false,

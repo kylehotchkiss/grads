@@ -188,6 +188,20 @@ class Grads {
 
 
     //
+    // Returns auto-configuration values for the current request
+    // (eg return resolution value so map knows how big blocks should be)
+    //
+    config() {
+        var resolution = this.reducer ? this.model.options.resolution * this.reducer : this.model.options.resolution;
+
+        return {
+            offset: this.offset, // backwards iterations to reach dataset (eg 1)
+            resolution: resolution // deg
+        }
+    }
+
+
+    //
     // Generate a GrADS parameter string for request URLs.
     // Pass it any number of string arguments, it'll know what to do.
     //
@@ -493,7 +507,7 @@ class Grads {
             }
 
             // console.log( 'Requests:' + this.counter );
-            callback( values );
+            callback( values, this.config() );
         }
    }
 
@@ -548,7 +562,7 @@ class Grads {
                     _.merge(ensemble, results[i]);
                 }
 
-                callback( ensemble );
+                callback( ensemble, this.config() );
             }
         });
     }
