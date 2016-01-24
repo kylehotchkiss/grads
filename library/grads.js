@@ -9,6 +9,7 @@ var _ = require('lodash');
 var async = require('async');
 var moment = require('moment');
 var request = require('request');
+var timezone = require("tz-lookup");
 var dictionary = require('../data/variable-mapping.json').gfs;
 var models = { noaa: require('../data/noaa-models.json') };
 

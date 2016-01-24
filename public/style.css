@@ -30,6 +30,27 @@ p {
     position: relative;
 }
 
-.metrics .selected {
+.controls-metrics .metric {
+    color: #999999;
+    cursor: pointer;
+    font-size: 10px;
+    font-family: 'Helvetica', sans-serif;
+    text-align: center;
+}
+
+.controls-metrics .selected {
+    color: #000000;
     font-weight: bold;
+}
+
+.controls-metrics i {
+    display: table;
+    font-size: 30px;
+    margin: 0 auto;
+}
+
+.controls-country {
+    transition: .5s ease;
+    -moz-transition: .5s ease;
+    -webkit-transition: .5s ease;
 }

@@ -14,7 +14,7 @@ class Weather extends Grads {
 
     visualize( callback ) {
         let self = this;
-        var metrics = ["temperature", "clouds", "precipitation_rate", "precipitation_frozen", "snow_depth"];
+        var metrics = ["temperature", "clouds", "pressure", "precipitation_rate", "precipitation_frozen", "snow_depth"];
 
         self.bulkFetch(metrics, ( values, config ) => {
             callback( values, config );
