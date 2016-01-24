@@ -83,7 +83,7 @@ var ForecastController = React.createClass({
 
             this.setState({ loaded: false });
 
-            jQuery.ajax({ url: `/ranged/${lat}/${lon}/0`, success: response => {
+            jQuery.ajax({ url: `/weather/visualize/${lat}/${lon}/0`, success: response => {
                 let views = [];
                 let timeline = [];
                 let data = response.data;

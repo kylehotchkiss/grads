@@ -4,7 +4,6 @@
 //
 'use strict';
 
-var async = require('async');
 var Grads = require('../grads.js');
 var conversions = require('../conversions.js');
 

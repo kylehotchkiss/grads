@@ -11,6 +11,8 @@ var app = express();
 
 var Grads = require('./library/grads.js');
 var Sea = require('./library/abstractions/sea.js');
+var Weather = require('./library/abstractions/weather.js');
+
 var Conditions = require("./library/conditions.js");
 
 app.use( express.static('public') );
@@ -58,7 +60,7 @@ app.get('/weather/visualize/:lat/:lon/:alt/:model?', function ( req, res ) {
     try {
         var target = new Weather( req.params.lat, req.params.lon, ( req.params.alt || 0 ) );
 
-        target.visualize(weather, values => {
+        target.visualize(values => {
             res.json({ status: 'success', data: { values: values }});
         });
     } catch ( error ) {

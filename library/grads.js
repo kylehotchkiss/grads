@@ -62,32 +62,6 @@ var mdsave = function( values, indexes, value ) {
 
 
 //
-// Generate a GrADS parameter string for request URLs.
-// Pass it any number of string arguments, it'll know what to do.
-//
-var parameters = function() {
-    var output = "";
-
-    for ( var i in arguments ) {
-        var param = arguments[i];
-
-        if ( Array.isArray( param ) ) {
-            if ( param.length === 1 ) {
-                output += "[" + param[0] + "]";
-            } else {
-                output += "[" + param[0] + ':' + param[1] + "]";
-                //output += "[" + param[0] + ':4:' + param[1] + "]";
-            }
-        } else {
-            output += "[" + param + "]";
-        }
-    }
-
-    return output;
-};
-
-
-//
 // Get Regex matches for a given string and regex.
 //
 var matches = function( string, regex, index ) {
@@ -115,6 +89,7 @@ class Grads {
         this.lat = [];
         this.lon = [];
         this.offset = 0;
+        this.reducer = 0;
         this.counter = 0;
         this.incrementCounter = 0;
         this.model = models.noaa[ model ];
@@ -126,8 +101,15 @@ class Grads {
         // TODO: Can make this more robust in future by flipping them for user
         if ( lat.indexOf(':') !== -1 ) {
             lat = lat.split(':');
+            lat[0] = parseFloat(lat[0]);
+            lat[1] = parseFloat(lat[1]);
+            var diffLat = ( lat[1] - lat[0] ) / this.model.options.resolution;
 
-            if ( parseFloat(lat[0]) > parseFloat(lat[1]) ) {
+            if ( diffLat > 50 ) {
+                this.reducer = Math.ceil(diffLat / 50);
+            }
+
+            if ( lat[0] > lat[1] ) {
                 throw new Error('Smaller Latitude must occur first in range');
             }
         } else {
@@ -136,8 +118,19 @@ class Grads {
 
         if ( lon.indexOf(':') !== -1 ) {
             lon = lon.split(':');
+            lon[0] = parseFloat(lon[0]);
+            lon[1] = parseFloat(lon[1]);
+            var diffLon = (lon[1] - lon[0]) / this.model.options.resolution;
 
-            if ( parseFloat(lon[0]) > parseFloat(lon[1]) ) {
+            if ( diffLon > 50 ) {
+                var reducer = Math.ceil( diffLon / 50 );
+
+                if ( reducer > this.reducer ) {
+                    this.reducer = reducer
+                }
+            }
+
+            if ( lon[0] > lon[1] ) {
                 throw new Error('Smaller Longitude must occur first in range');
             }
         } else {
@@ -160,10 +153,18 @@ class Grads {
         if ( this.model.options.degreeseast ) {
             for ( var i in lon ) {
                 if ( lon[i] < 0 ) {
-                    lon[i] = ( 360 - (lon[i] * -1) );
+                    lon[i] = ( 360 - ( parseFloat(lon[i]) * -1 ) );
                 }
             }
+
+            // Reverse Parameter order if needed
+            if ( lon[0] > lon[1] ) {
+                var immediate = lon[0];
+                lon[0] = lon[1]
+                lon[1] = immediate;
+            }
         }
+
 
         // Validate Boundaries and set grads-friendly coordinate sets
         for ( var j in lat ) {
@@ -186,6 +187,40 @@ class Grads {
     }
 
 
+    //
+    // Generate a GrADS parameter string for request URLs.
+    // Pass it any number of string arguments, it'll know what to do.
+    //
+    parameters() {
+        var output = "";
+
+        for ( var i in arguments ) {
+            var param = arguments[i];
+
+            if ( Array.isArray( param ) ) {
+                if ( param.length === 1 ) {
+                    output += "[" + param[0] + "]";
+                } else {
+                    if ( this.reducer ) {
+                        output += "[" + param[0] + ':' + this.reducer + ':' + param[1] + "]";
+                    } else {
+                        output += "[" + param[0] + ':' + param[1] + "]";
+                    }
+                }
+            } else {
+                output += "[" + param + "]";
+            }
+        }
+
+        return output;
+    }
+
+
+    //
+    // "Time Traveling"
+    // New dataset release schedules are ambigious at best, so move backwards if
+    // the desired dataset is currently unavailable.
+    //
     increment( hours ) {
         this.incrementCounter++;
         this.offset = this.offset + ( hours || 1 );
@@ -261,10 +296,10 @@ class Grads {
 
         // Generate parameters portion of the URL, adding level if set
         if ( typeof level === "number" ) {
-            subset = parameters( offset, level, this.lat, this.lon );
+            subset = this.parameters( offset, level, this.lat, this.lon );
         } else {
             //subset = parameters( offset, this.lat, this.lon );
-            subset = parameters( offset + ':' + ( offset + 20 ), this.lat, this.lon );
+            subset = this.parameters( offset + ':' + ( offset + 20 ), this.lat, this.lon );
         }
 
         // Generate the entire URL, adding altitude if set
@@ -290,11 +325,13 @@ class Grads {
 
         if ( lines[0] === "<html>" ) {
             if ( lines[11].indexOf('Invalid Parameter Exception') ) {
-                // Figure out why we're time travelling, if we want.
-                // console.log( lines[11] );
+                if ( lines[11].indexOf('is not an available dataset') ) {
+                    timetravel();
+                } else {
+                    console.error( lines[11] );
+                    throw new Error( 'GrADS parameter error' );
+                }
             }
-
-            timetravel();
         } else {
             // Capture all values and their array location
             for ( var i = 1; i < lines.length; i++ ) {

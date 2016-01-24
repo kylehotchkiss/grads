@@ -19,6 +19,7 @@
         "options": {
             "fidelity": "low",
             "quarterly": true,
+            "resolution": 0.25,
             "degreeseast": true
         }
     },
@@ -41,6 +42,7 @@
         },
         "options": {
             "fidelity": "low",
+            "resolution": 1,
             "quarterly": true,
             "degreeseast": true
         }
@@ -64,6 +66,7 @@
         },
         "options": {
             "fidelity": "high",
+            "resolution": 0.25,
             "quarterly": false,
             "degreeseast": false
         }
@@ -88,7 +91,8 @@
         "options": {
             "fidelity": "high",
             "quarterly": false,
-            "degreeseast": false
+            "degreeseast": false,
+            "resolution": 0.0025
         }
     },
     "wave": {
@@ -110,6 +114,7 @@
         "options": {
             "fidelity": "low",
             "quarterly": true,
+            "resolution": 0.5,
             "degreeseast": true
         }
     }
