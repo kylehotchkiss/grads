@@ -20,7 +20,8 @@
             "fidelity": "low",
             "quarterly": true,
             "resolution": 0.25,
-            "degreeseast": true
+            "degreeseast": true,
+            "modeltmpl": "{{ model.slug }}/{{ model.name }}{{ time.format('YYYYMMDD') }}/{{ model.slug }}_{{ hourset }}z.ascii?"
         }
     },
     "rap": {
@@ -44,7 +45,8 @@
             "fidelity": "high",
             "resolution": 0.25,
             "quarterly": false,
-            "degreeseast": false
+            "degreeseast": false,
+            "modeltmpl": "{{ model.slug }}/{{ model.name }}{{ time.format('YYYYMMDD') }}/{{ model.slug }}_{{ hourset }}z.ascii?"
         }
     },
     "hrrr": {
@@ -68,7 +70,8 @@
             "fidelity": "high",
             "quarterly": false,
             "degreeseast": false,
-            "resolution": 0.0025
+            "resolution": 0.0025,
+            "modeltmpl": "{{ model.slug }}/{{ model.name }}{{ time.format('YYYYMMDD') }}/{{ model.slug }}_{{ hourset }}z.ascii?"
         }
     },
     "wave": {
@@ -91,7 +94,8 @@
             "fidelity": "low",
             "quarterly": true,
             "resolution": 0.5,
-            "degreeseast": true
+            "degreeseast": true,
+            "modeltmpl": "{{ model.slug }}/{{ model.name }}/{{ time.format('YYYYMMDD') }}/multi_1.glo_30mext{{ time.format('YYYYMMDD') }}_{{ hourset }}z.ascii?"
         }
     }
 }

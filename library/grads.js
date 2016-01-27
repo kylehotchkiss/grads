@@ -12,6 +12,8 @@ var request = require('request');
 var dictionary = require('../data/variable-mapping.json').gfs;
 var models = { noaa: require('../data/noaa-models.json') };
 
+_.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
+
 
 //
 // Remap coordinate values into more grads friendly ranges.
@@ -300,13 +302,20 @@ class Grads {
         offset = remap( moment().diff(this.time, 'seconds'), [ 0, ( 86400 * this.model.steps.days ) ], [ 0, this.model.steps.time ] );
 
         // Build the model + date portion of the URL
-        if ( this.model.slug === 'wave' ) { // TODO: Allow for passing arbirary naming formats via config
-            model = this.model.slug + "/" + this.model.name + '/' + this.time.format("YYYYMMDD") +
-                "/multi_1.glo_30mext" + this.time.format("YYYYMMDD") + "_" + hourset + "z.ascii?";
-        } else {
-            model = this.model.slug + "/" + this.model.name + this.time.format("YYYYMMDD") +
-                "/" + this.model.slug + "_" + hourset + "z.ascii?";
-        }
+        //if ( this.model.slug === 'wave' ) { // TODO: Allow for passing arbirary naming formats via config
+            // model = this.model.slug + "/" + this.model.name + '/' + this.time.format("YYYYMMDD") + "/multi_1.glo_30mext" + this.time.format("YYYYMMDD") + "_" + hourset + "z.ascii?";
+        //} else {
+            // model = this.model.slug + "/" + this.model.name + this.time.format("YYYYMMDD") + "/" + this.model.slug + "_" + hourset + "z.ascii?";
+        //}
+
+        // Every model has it's own very random URL format. All are defined in models file.
+        var template = _.template( this.model.options.modeltmpl );
+
+        model = template({
+            time: this.time,
+            hourset: hourset,
+            model: this.model
+        });
 
         // Generate parameters portion of the URL, adding level if set
         if ( typeof level === "number" ) {
