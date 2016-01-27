@@ -17,7 +17,7 @@ var models = { noaa: require('../data/noaa-models.json') };
 // Remap coordinate values into more grads friendly ranges.
 // http://rosettacode.org/wiki/Map_range#JavaScript
 //
-var remap = function( value, from, to, strict ) {
+var remap = ( value, from, to, strict ) => {
     var result = to[0] + ( value - from[0] ) * ( to[1] - to[0] ) / ( from[1] - from[0] );
     if ( strict ) { // Allow better proximity to data when GrADS allows it
         return Math.floor( result );
@@ -32,7 +32,7 @@ var remap = function( value, from, to, strict ) {
 // This literally builds strings for objects and evals them
 // This is likely the largest speed issue in the entire app
 //
-var mdsave = function( values, indexes, value ) {
+var mdsave = ( values, indexes, value ) => {
     var cmd = "values";
 
     if ( Array.isArray( value ) ) {
@@ -64,7 +64,7 @@ var mdsave = function( values, indexes, value ) {
 //
 // Get Regex matches for a given string and regex.
 //
-var matches = function( string, regex, index ) {
+var matches = ( string, regex, index ) => {
     var match;
     var matches = [];
     var i = index || 1;
@@ -303,6 +303,8 @@ class Grads {
         if ( this.model.slug === 'wave' ) { // TODO: Allow for passing arbirary naming formats via config
             model = this.model.slug + "/" + this.model.name + '/' + this.time.format("YYYYMMDD") +
                 "/multi_1.glo_30mext" + this.time.format("YYYYMMDD") + "_" + hourset + "z.ascii?";
+        } else if ( this.model.slug === 'GLDAS_NOAH025_M.020' ) {
+            model = this.model.slug + ".ascii?";
         } else {
             model = this.model.slug + "/" + this.model.name + this.time.format("YYYYMMDD") +
                 "/" + this.model.slug + "_" + hourset + "z.ascii?";
@@ -523,11 +525,11 @@ class Grads {
        // Debug:
        //console.log( url );
 
-       request( url, function( error, response, body ) {
+       request( url, ( error, response, body ) => {
            self.counter++;
 
            if ( !error ) {
-               self.parse( variable, body, callback, function() {
+               self.parse( variable, body, callback, () => {
                     // Time Travel
                     self.increment();
                     self.fetch( variable, includeAlt, callback );

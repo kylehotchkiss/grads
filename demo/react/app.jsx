@@ -12,7 +12,7 @@ var ForecastController = React.createClass({
             step: 0,
             country: '',
             loaded: false,
-            metric: 'clouds',
+            metric: 'temperature',
             animationID: false,
 
             views: [],
@@ -130,8 +130,19 @@ var ForecastController = React.createClass({
 });
 
 jQuery(() => {
-    L.mapbox.accessToken = 'pk.eyJ1Ijoia3lsZWhvdGNoa2lzcyIsImEiOiJrTUJ4M0NzIn0.4yBXlPfoO1B2T1rnudXr_w';
-    let map = L.mapbox.map('js-map-container', 'mapbox.light');
+    mapboxgl.accessToken = 'pk.eyJ1Ijoia3lsZWhvdGNoa2lzcyIsImEiOiJrTUJ4M0NzIn0.4yBXlPfoO1B2T1rnudXr_w';
 
-    ReactDOM.render( <ForecastController map={ map } />, document.getElementById('react-forecast-controller') );
+    var map = new mapboxgl.Map({
+        zoom: 3,
+        container: 'js-map-container',
+        center: [ -98.583333, 39.833333 ],
+        style: 'mapbox://styles/mapbox/light-v8'
+    });
+
+    map.on('style.load', () => {
+        ReactDOM.render(
+            <ForecastController map={ map } />,
+            document.getElementById('react-forecast-controller')
+        );
+    });
 });

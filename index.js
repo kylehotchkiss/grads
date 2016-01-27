@@ -60,7 +60,7 @@ app.get('/weather/visualize/:lat/:lon/:alt/:model?', function ( req, res ) {
     try {
         var target = new Weather( req.params.lat, req.params.lon, ( req.params.alt || 0 ) );
 
-        target.visualize(( values, config ) => {
+        target.visualize(function( values, config ) {
             res.json({ status: 'success', data: { values: values, config: config }});
         });
     } catch ( error ) {

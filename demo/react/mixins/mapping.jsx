@@ -1,89 +1,95 @@
 /* global L:true */
 
+var chroma = require('chroma-js');
+
 module.exports = {
     clearMap() {
-        this.props.map.removeLayer( this.state.pointsLayer );
+        try {
+            if ( this.state.pointsSource && this.state.pointsLayers.length )
+            this.props.map.batch(batch => {
+                this.props.map.removeSource( this.state.pointsSource );
+
+                for ( var i in this.state.pointsLayers ) {
+                    this.props.map.removeLayer( this.state.pointsLayers[i] );
+                }
+            });
+        } catch ( error ) {}
     },
 
     drawMap() {
         this.clearMap();
-
+        
         var points = this.state.views[ this.state.step ].points;
         var country = this.state.views[ this.state.step ].country;
 
-        let layer = L.geoJson(points, {
-            pointToLayer: feature => {
-                if ( this.state.metric === 'temperature' ) {
-                    var kelvin = parseFloat(feature.properties.values.temperature);
-                    var english = ( kelvin - 273.15 ) * 1.8000 + 32.00;
+        // Move to other file
+        var geojson = {
+            type: 'FeatureCollection',
+            features: []
+        }
 
-                    return L.rectangle([[
-                        feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
-                        feature.geometry.coordinates[0] - (this.state.gradsConfig.resolution / 2)
-                    ], [
-                        feature.geometry.coordinates[1] + (this.state.gradsConfig.resolution / 2),
-                        feature.geometry.coordinates[0] + (this.state.gradsConfig.resolution / 2)
-                    ]], {
-                        weight: 0,
-                        clickable: false,
-                        fillOpacity: 0.5,
-                        fillColor: this.color( 'temperature', english )
-                    });
-                } else if ( this.state.metric === 'pressure' ) {
+        for ( var i in points ) {
+            var feature = points[i];
+            var lat = feature.geometry.coordinates[1];
+            var lon = feature.geometry.coordinates[0];
+            var res = this.state.gradsConfig.resolution / 2;
 
-                    console.log( feature.properties.values.pressure );
-
-                    return L.rectangle([[
-                        feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
-                        feature.geometry.coordinates[0] - (this.state.gradsConfig.resolution / 2)
-                    ], [
-                        feature.geometry.coordinates[1] + (this.state.gradsConfig.resolution / 2),
-                        feature.geometry.coordinates[0] + (this.state.gradsConfig.resolution / 2)
-                    ]], {
-                        weight: 0,
-                        clickable: false,
-                        fillOpacity: 0.5,
-                        fillColor: this.color( 'pressure', parseFloat(feature.properties.values.pressure) )
-                    });
-                } else if ( this.state.metric === 'clouds' ) {
-                    var cover = ( parseFloat( feature.properties.values.clouds ) / 100 ) * .5;
-
-                    return L.rectangle([[
-                        feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
-                        feature.geometry.coordinates[0] - (this.state.gradsConfig.resolution / 2)
-                    ], [
-                        feature.geometry.coordinates[1] + (this.state.gradsConfig.resolution / 2),
-                        feature.geometry.coordinates[0] + (this.state.gradsConfig.resolution / 2)
-                    ]], {
-                        weight: 0,
-                        clickable: false,
-                        fillOpacity: cover,
-                        fillColor: '#000000'
-                    });
-                } else if ( this.state.metric === 'snow' ) {
-                    var cover = (( parseFloat( feature.properties.values.snow_depth ) * 3.28084 ) / 2) * .5;
-
-                    return L.rectangle([[
-                        feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
-                        feature.geometry.coordinates[0] - (this.state.gradsConfig.resolution / 2)
-                    ], [
-                        feature.geometry.coordinates[1] + (this.state.gradsConfig.resolution / 2),
-                        feature.geometry.coordinates[0] + (this.state.gradsConfig.resolution / 2)
-                    ]], {
-                        weight: 0,
-                        clickable: false,
-                        fillOpacity: cover,
-                        fillColor: '#0000FF'
-                    });
+            geojson.features.push({
+                type: 'Feature',
+                properties: feature.properties.values,
+                geometry: {
+                    type: 'Polygon',
+                    coordinates: [[
+                        [ lon + res, lat + res ],
+                        [ lon + res, lat - res ],
+                        [ lon - res, lat - res ],
+                        [ lon - res, lat + res ],
+                        [ lon + res, lat + res ]
+                    ]]
                 }
+            });
+        }
+
+        this.props.map.addSource('grid-' + this.state.step, { type: 'geojson', data: geojson });
+
+        // Variable Specific
+        var min = 223.15;
+        var max = 311.15;
+        var range = max - min;
+        var step = range / 20;
+        // End variable Specific
+
+        var layers = [];
+        var color = chroma.scale( [ '#67001f','#b2182b','#d6604d','#f4a582','#fddbc7','#d1e5f0','#92c5de','#4393c3','#2166ac','#053061' ].reverse() ).domain([ 0, 20 ]);
+
+        this.props.map.batch(batch => {
+            for ( var i = 0; i < 20; i++ ) {
+                var start = min + ( step * ( i + 1 ) );
+                var layer = 'layer-' + i + '-' + this.state.step;
+
+                batch.addLayer({
+                    id: layer,
+                    layout: {},
+                    type: 'fill',
+                    source: 'grid-' + this.state.step,
+                    filter: [ "all", [ ">=", "temperature", start ], [ "<", "temperature", ( start + step ) ] ],
+                    paint: {
+                        'fill-opacity': .65,
+                        'fill-antialias': false,
+                        'fill-color': color( i ).hex()
+                    }
+                });
+
+                layers.push( layer );
             }
-        }).addTo( this.props.map );
+        });
 
         this.setState({
-            pointsLayer: layer
+            pointsLayers: layers,
+            pointsSource: 'grid-' + this.state.step
         }, () => {
             if ( !this.state.animationID ) {
-                this.props.map.fitBounds([[ country.latMin, country.lonMin ], [ country.latMax, country.lonMax ]]);
+                this.props.map.fitBounds([[ country.lonMin, country.latMin ], [ country.lonMax, country.latMax ]], { padding: 30 });
             }
         });
     }

@@ -28,6 +28,7 @@
   "homepage": "https://github.com/kylehotchkiss/grads",
   "dependencies": {
     "async": "^0.9.0",
+    "chroma-js": "^1.1.1",
     "express": "^4.13.3",
     "lodash": "^4.0.0",
     "moment": "^2.9.0",

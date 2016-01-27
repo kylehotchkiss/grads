@@ -93,5 +93,28 @@
             "resolution": 0.5,
             "degreeseast": true
         }
+    },
+    "gldas": {
+        "name": "gldas",
+        "slug": "GLDAS_NOAH025_M.020",
+        "base": "http://agdisc.gsfc.nasa.gov/dods/",
+        "range": {
+            "latMin": 59.875,
+            "latMax": 89.875,
+            "lonMin": -179.875,
+            "lonMax": 179.875
+        },
+        "steps": {
+            "lat": 336,
+            "lon": 720,
+            "days": 7,
+            "time": 61
+        },
+        "options": {
+            "fidelity": "low",
+            "quarterly": true,
+            "resolution": 0.5,
+            "degreeseast": false
+        }
     }
 }
