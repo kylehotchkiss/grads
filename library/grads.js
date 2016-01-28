@@ -6,11 +6,18 @@
 'use strict';
 
 var _ = require('lodash');
+var Redis = require("redis");
 var async = require('async');
 var moment = require('moment');
 var request = require('request');
 var dictionary = require('../data/variable-mapping.json').gfs;
 var models = { noaa: require('../data/noaa-models.json') };
+
+var redis;
+
+if ( true ) {
+    redis = Redis.createClient();
+}
 
 _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
@@ -339,7 +346,7 @@ class Grads {
      * Read the GrADS response and decode it
      *
      */
-    parse( variable, content, callback, timetravel ) {
+    parse( url, variable, content, callback, timetravel ) {
         var key;
         var lines = content.split("\n");
         var counter = /\[(\d*)\]/g;
@@ -515,6 +522,11 @@ class Grads {
                 }
             }
 
+            // Save processed result into redis
+            if ( redis ) {
+                redis.set( 'request:' + url, JSON.stringify(values) );
+            }
+
             // console.log( 'Requests:' + this.counter );
             callback( values, this.config() );
         }
@@ -530,24 +542,37 @@ class Grads {
        var url = this.build( variable, includeAlt );
 
        // Debug:
-       //console.log( url );
+       // console.log( url );
 
-       request( url, function( error, response, body ) {
-           self.counter++;
+       var online = () => {
+           request( url, function( error, response, body ) {
+               self.counter++;
 
-           if ( !error ) {
-               self.parse( variable, body, callback, function() {
-                    // Time Travel
-                    self.increment();
-                    self.fetch( variable, includeAlt, callback );
-               });
+               if ( !error ) {
+                   self.parse( url, variable, body, callback, function() {
+                        // Time Travel
+                        self.increment();
+                        self.fetch( variable, includeAlt, callback );
+                   });
+               }
+           });
+       }
 
-               // Wut to do?
-           }
-       });
+       var cached = values => {
+           callback( values, this.config() );
+       }
 
-       // TODO:
-       // - Cache responses via Redis for 1 hour
+       if ( redis ) {
+           redis.get('request:' + url, function( error, values ) {
+               if ( values ) {
+                   cached( JSON.parse(values) );
+               } else {
+                   online();
+               }
+           });
+       } else {
+           online();
+       }
    }
 
    /**

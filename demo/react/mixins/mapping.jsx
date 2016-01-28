@@ -9,7 +9,7 @@ module.exports = {
         this.clearMap();
 
         var points = this.state.views[ this.state.step ].points;
-        var country = this.state.views[ this.state.step ].country;
+        var place = this.state.views[ this.state.step ].place;
 
         let layer = L.geoJson(points, {
             pointToLayer: feature => {
@@ -30,9 +30,6 @@ module.exports = {
                         fillColor: this.color( 'temperature', english )
                     });
                 } else if ( this.state.metric === 'pressure' ) {
-
-                    console.log( feature.properties.values.pressure );
-
                     return L.rectangle([[
                         feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
                         feature.geometry.coordinates[0] - (this.state.gradsConfig.resolution / 2)
@@ -83,7 +80,7 @@ module.exports = {
             pointsLayer: layer
         }, () => {
             if ( !this.state.animationID ) {
-                this.props.map.fitBounds([[ country.latMin, country.lonMin ], [ country.latMax, country.lonMax ]]);
+                this.props.map.fitBounds([[ place.latMin, place.lonMin ], [ place.latMax, place.lonMax ]]);
             }
         });
     }

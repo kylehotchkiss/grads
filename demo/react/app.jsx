@@ -1,16 +1,17 @@
 /* global document:true */
 
 'use strict';
+import _ from 'lodash';
 import React from 'react';
 import jQuery from 'jquery';
 import ReactDOM from 'react-dom';
-import { countries } from 'json!../data/countries.json';
+import { countries, states } from 'json!../data/places.json';
 
 var ForecastController = React.createClass({
     getInitialState() {
         return {
             step: 0,
-            country: '',
+            place: '',
             loaded: false,
             metric: 'clouds',
             animationID: false,
@@ -42,23 +43,23 @@ var ForecastController = React.createClass({
     //////////////////
     // INPUT EVENTS //
     //////////////////
-    clearCountry() {
+    clearPlace() {
         this.setState({
             step: 0,
-            country: ''
+            place: ''
         }, () => {
             this.clearMap();
         });
     },
 
-    changeCountry() {
+    changePlace() {
         this.endAnimation();
 
         this.setState({
             step: 0,
-            country: this.refs.country.value
+            place: this.refs.place.value
         }, () => {
-            this.requestPoints( this.refs.country.value );
+            this.requestPoints( this.refs.place.value );
         });
     },
 
@@ -80,12 +81,25 @@ var ForecastController = React.createClass({
         })
     },
 
-    requestPoints( countryID ) {
-        let country = countries[ countryID ];
+    requestPoints( placeID ) {
+        var country = _.find( countries, country => {
+            // Dumb trick to seperate states & countries with matching names
+            return country.name + ' ' === placeID;
+        });
 
-        if ( typeof country === 'object' ) {
-            let lat = country.latMin + ':' + country.latMax;
-            let lon = country.lonMin + ':' + country.lonMax;
+        var state = _.find( states, state => {
+            return state.name === placeID;
+        });
+
+        console.log('req points')
+        console.log( country )
+        console.log( state )
+
+        var place = country || state;
+
+        if ( typeof place === 'object' ) {
+            let lat = place.latMin + ':' + place.latMax;
+            let lon = place.lonMin + ':' + place.lonMax;
 
             this.setState({ loaded: false });
 
@@ -109,7 +123,7 @@ var ForecastController = React.createClass({
                             }
                         }
 
-                        views.push({ points: points, country: country });
+                        views.push({ points: points, place: place });
                         timeline.push( data.values[i][0][0].time );
                     }
 

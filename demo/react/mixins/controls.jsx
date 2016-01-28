@@ -3,23 +3,31 @@ import Moment from 'moment';
 import Range from 'react-range';
 import Loader from 'react-loader';
 import Submittable from 'react-submittable';
-import { countries } from 'json!../../data/countries.json';
+import { countries, states } from 'json!../../data/places.json';
 
 module.exports = {
     renderPlaces( margin ) {
         return (
             <div className="col-sm-3 controls-country" style={{ marginLeft: margin + '%' }}>
-                <h3>Country</h3>
+                <h3>Location</h3>
 
-                <Submittable onEnter={ this.changeCountry } onCancel={ this.clearCountry }>
-                    <select ref="country" onChange={ this.changeCountry } defaultValue={ this.state.country }>
-                        <option value="">Select a country...</option>
-
-                        {countries.map(( country, i ) => {
-                            return (
-                                <option value={ i } key={ i }>{ country.name }</option>
-                            );
-                        })}
+                <Submittable onEnter={ this.changePlace } onCancel={ this.clearPlace }>
+                    <select ref="place" onChange={ this.changePlace } defaultValue={ this.state.place }>
+                        <option value="">Select a location...</option>
+                        <optgroup label="Countries">
+                            {countries.map(( country, i ) => {
+                                return (
+                                    <option value={ country.name + ' ' } key={ i }>{ country.name }</option>
+                                );
+                            })}
+                        </optgroup>
+                        <optgroup label="States">
+                            {states.map(( state, i ) => {
+                                return (
+                                    <option value={ state.name } key={ i }>{ state.name }</option>
+                                );
+                            })}
+                        </optgroup>
                     </select>
                 </Submittable>
             </div>
@@ -78,7 +86,7 @@ module.exports = {
     },
 
     render() {
-        if ( !this.state.country ) {
+        if ( !this.state.place ) {
             return (
                 <div className="row">
                     { this.renderPlaces( 33 ) }
