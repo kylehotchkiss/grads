@@ -35,16 +35,51 @@ module.exports = {
     },
 
     renderTimeline() {
+        let datesShown = [];
+        let percentage = ( this.state.step / this.state.timeline.length ) * 100 || 0;
+
+        console.log( percentage );
+
         return (
-            <div className="col-sm-3 controls-time">
-                <h3>Date / Time</h3>
-                <Range type="range" onChange={ this.changeStep } value={ this.state.step } min={ 0 } max={ this.state.timeline.length } />
-                { Moment( this.state.timeline[ this.state.step ] ).format('MM/D/YY, h:mma') }
-                <br />
-                <a href="#" onClick={ this.endAnimation }>Stop</a>
-                <a href="#" onClick={ this.startAnimation }>Start</a>
+            <div className="controls-time">
+                <div className="row">
+                    <div className="col-sm-12">
+                        <div className="timeline">
+                            <div className="bar">
+                                {this.state.timeline.map( ( date, i ) => {
+                                    let percent = ( i / this.state.timeline.length ) * 100;
+                                    let interval = this.state.timeline / 20;
+                                    let formattedDate = Moment( date ).format('MM/D')
+                                    let formattedTime = Moment( date ).format('ha');
+                                    let showDate = ( datesShown.indexOf( formattedDate ) === -1 );
+                                    datesShown.push( formattedDate );
+
+                                    return (
+                                        <div className="stop" key={ i } style={{ 'left': `${ percent }%` }}>
+                                            { formattedTime }
+                                            <br />
+                                            { showDate && formattedDate }
+                                        </div>
+                                    )
+                                })}
+                                <div className="cursor" style={{ 'left': `${ percentage }%` }}></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
+    },
+
+    renderAnimationControls() {
+        return (
+            <div className="col-sm-3">
+                {this.state.animationID ?
+                    <a href="#" onClick={ this.endAnimation }>Stop</a> :
+                    <a href="#" onClick={ this.startAnimation }>Start</a>
+                }
+            </div>
+        )
     },
 
     renderMetrics() {
@@ -80,6 +115,13 @@ module.exports = {
                             Snow Depth
                         </div>
                     </div>
+
+                    <div onClick={ this.changeMetric.bind( this, 'wind') }  className="col-sm-3 metric">
+                        <div className={ this.state.metric === 'wind' ? 'selected' : '' }>
+                            <i className="ss-wind"></i>
+                            Wind
+                        </div>
+                    </div>
                 </div>
             </div>
         )
@@ -88,26 +130,38 @@ module.exports = {
     render() {
         if ( !this.state.place ) {
             return (
-                <div className="row">
-                    { this.renderPlaces( 33 ) }
+                <div className="controls">
+                    { this.renderTimeline() }
+
+                    <div className="row">
+                        { this.renderPlaces( 33 ) }
+                    </div>
                 </div>
             );
         } else if ( !this.state.loaded ) {
             return (
-                <div className="row">
-                    { this.renderPlaces( 0 ) }
+                <div className="controls">
+                    { this.renderTimeline() }
 
-                    <div className="col-sm-6">
-                        <Loader loaded={ false } top="0" scale={.85}></Loader>
+                    <div className="row">
+                        { this.renderPlaces( 0 ) }
+
+                        <div className="col-sm-6">
+                            <Loader loaded={ false } top="0" scale={.85}></Loader>
+                        </div>
                     </div>
                 </div>
             );
         } else {
             return (
-                <div className="row">
-                    { this.renderPlaces( 0 ) }
-                    { this.renderMetrics() }
+                <div className="controls">
                     { this.renderTimeline() }
+
+                    <div className="row">
+                        { this.renderPlaces( 0 ) }
+                        { this.renderMetrics() }
+                        { this.renderAnimationControls() }
+                    </div>
                 </div>
             );
         }

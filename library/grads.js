@@ -100,6 +100,7 @@ class Grads {
         this.offset = 0;
         this.reducer = 0;
         this.counter = 0;
+        this.resolution = 60; // set via query string
         this.incrementCounter = 0;
         this.model = models.noaa[ model ];
         this.time = moment().utc().subtract(this.offset, 'hours');
@@ -114,8 +115,8 @@ class Grads {
             lat[1] = parseFloat(lat[1]);
             var diffLat = ( lat[1] - lat[0] ) / this.model.options.resolution;
 
-            if ( diffLat > 50 ) {
-                this.reducer = Math.ceil(diffLat / 50);
+            if ( diffLat > this.resolution ) {
+                this.reducer = Math.ceil(diffLat / this.resolution);
             }
 
             if ( lat[0] > lat[1] ) {
@@ -131,8 +132,8 @@ class Grads {
             lon[1] = parseFloat(lon[1]);
             var diffLon = (lon[1] - lon[0]) / this.model.options.resolution;
 
-            if ( diffLon > 50 ) {
-                var reducer = Math.ceil( diffLon / 50 );
+            if ( diffLon > this.resolution ) {
+                var reducer = Math.ceil( diffLon / this.resolution );
 
                 if ( reducer > this.reducer ) {
                     this.reducer = reducer
@@ -329,7 +330,7 @@ class Grads {
             subset = this.parameters( offset, level, this.lat, this.lon );
         } else {
             //subset = parameters( offset, this.lat, this.lon );
-            subset = this.parameters( offset + ':' + ( offset + 20 ), this.lat, this.lon );
+            subset = this.parameters( offset + ':' + ( offset + 16 ), this.lat, this.lon );
         }
 
         // Generate the entire URL, adding altitude if set
@@ -565,7 +566,7 @@ class Grads {
        if ( redis ) {
            redis.get('request:' + url, function( error, values ) {
                if ( values ) {
-                   cached( JSON.parse(values) );
+                   cached( JSON.parse( values ) );
                } else {
                    online();
                }
