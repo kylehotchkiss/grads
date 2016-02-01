@@ -17,6 +17,7 @@ var ForecastController = React.createClass({
             animationID: false,
 
             views: [],
+            frames: [],
             timeline: [],
             gradsConfig: {},
             pointsLayer: {},
@@ -46,7 +47,8 @@ var ForecastController = React.createClass({
     clearPlace() {
         this.setState({
             step: 0,
-            place: ''
+            place: '',
+            frames: []
         }, () => {
             this.clearMap();
         });
@@ -57,6 +59,7 @@ var ForecastController = React.createClass({
 
         this.setState({
             step: 0,
+            frames: [],
             place: this.refs.place.value
         }, () => {
             this.requestPoints( this.refs.place.value );
@@ -75,6 +78,8 @@ var ForecastController = React.createClass({
 
     changeMetric( metric ) {
         this.setState({
+            step: 0,
+            frames: [],
             metric: metric
         }, () => {
             this.drawMap();
@@ -91,10 +96,6 @@ var ForecastController = React.createClass({
             return state.name === placeID;
         });
 
-        console.log('req points')
-        console.log( country )
-        console.log( state )
-
         var place = country || state;
 
         if ( typeof place === 'object' ) {
@@ -103,7 +104,12 @@ var ForecastController = React.createClass({
 
             this.setState({ loaded: false });
 
+            console.time('GET');
+
             jQuery.ajax({ url: `/weather/visualize/${lat}/${lon}/0`, success: response => {
+                console.timeEnd('GET');
+                console.time('PARSE');
+
                 let views = [];
                 let timeline = [];
                 let data = response.data;
@@ -128,11 +134,13 @@ var ForecastController = React.createClass({
                     }
 
                     this.setState({
-                        loaded: true,
+                        frames: [],
                         views: views,
+                        loaded: true,
                         timeline: timeline,
                         gradsConfig: data.config,
                     }, () => {
+                        console.timeEnd('PARSE');
                         this.drawMap();
                     });
                 } else {

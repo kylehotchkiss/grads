@@ -6,30 +6,58 @@ import Submittable from 'react-submittable';
 import { countries, states } from 'json!../../data/places.json';
 
 module.exports = {
-    renderPlaces( margin ) {
+    renderPlaces() {
         return (
-            <div className="col-sm-3 controls-country" style={{ marginLeft: margin + '%' }}>
+            <div className="controls-country">
                 <h3>Location</h3>
 
-                <Submittable onEnter={ this.changePlace } onCancel={ this.clearPlace }>
-                    <select ref="place" onChange={ this.changePlace } defaultValue={ this.state.place }>
-                        <option value="">Select a location...</option>
-                        <optgroup label="Countries">
-                            {countries.map(( country, i ) => {
-                                return (
-                                    <option value={ country.name + ' ' } key={ i }>{ country.name }</option>
-                                );
-                            })}
-                        </optgroup>
-                        <optgroup label="States">
-                            {states.map(( state, i ) => {
-                                return (
-                                    <option value={ state.name } key={ i }>{ state.name }</option>
-                                );
-                            })}
-                        </optgroup>
-                    </select>
-                </Submittable>
+                <select ref="place" onChange={ this.changePlace } defaultValue={ this.state.place } className="form-control">
+                    <option value="">Select a location...</option>
+                    <optgroup label="Countries">
+                        {countries.map(( country, i ) => {
+                            return (
+                                <option value={ country.name + ' ' } key={ i }>{ country.name }</option>
+                            );
+                        })}
+                    </optgroup>
+                    <optgroup label="States">
+                        {states.map(( state, i ) => {
+                            return (
+                                <option value={ state.name } key={ i }>{ state.name }</option>
+                            );
+                        })}
+                    </optgroup>
+                </select>
+            </div>
+        );
+    },
+
+    renderModels() {
+        return (
+            <div className="controls-models">
+                <h3>Forecast Model</h3>
+
+                <select ref="model" onChange={ this.changeModel } defaultValue={ this.state.model } className="form-control">
+                    <optgroup name="Global">
+                        <option name="gfs">GFS: Global Forecast System</option>
+                        <option name="cmcens" disabled>CMCENS: Canada Meteorological Center Ensemble</option>
+                        <option name="cmcens" disabled>GENS: Global Ensemble Forecast System</option>
+                    </optgroup>
+                    <optgroup name="USA Only">
+                        <option name="rap">RAP: Rapid Refresh</option>
+                        <option name="ruc" disabled>RUC: Rapid Update Cycle</option>
+                        <option name="hrr" disabled>HRRR: High Resolution Rapid Update Cycle</option>
+                    </optgroup>
+                </select>
+            </div>
+        );
+    },
+
+    renderDropdowns( margin ) {
+        return (
+            <div className="col-sm-3" style={{ marginLeft: margin + '%' }}>
+                { this.renderPlaces() }
+                { this.renderModels() }
             </div>
         );
     },
@@ -37,8 +65,6 @@ module.exports = {
     renderTimeline() {
         let datesShown = [];
         let percentage = ( this.state.step / this.state.timeline.length ) * 100 || 0;
-
-        console.log( percentage );
 
         return (
             <div className="controls-time">
@@ -134,7 +160,7 @@ module.exports = {
                     { this.renderTimeline() }
 
                     <div className="row">
-                        { this.renderPlaces( 33 ) }
+                        { this.renderDropdowns( 33 ) }
                     </div>
                 </div>
             );
@@ -144,7 +170,7 @@ module.exports = {
                     { this.renderTimeline() }
 
                     <div className="row">
-                        { this.renderPlaces( 0 ) }
+                        { this.renderDropdowns( 0 ) }
 
                         <div className="col-sm-6">
                             <Loader loaded={ false } top="0" scale={.85}></Loader>
@@ -158,7 +184,7 @@ module.exports = {
                     { this.renderTimeline() }
 
                     <div className="row">
-                        { this.renderPlaces( 0 ) }
+                        { this.renderDropdowns( 0 ) }
                         { this.renderMetrics() }
                         { this.renderAnimationControls() }
                     </div>

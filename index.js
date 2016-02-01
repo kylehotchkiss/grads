@@ -58,7 +58,7 @@ app.get('/sea/:lat/:lon', function ( req, res ) {
 
 app.get('/weather/visualize/:lat/:lon/:alt/:model?', function ( req, res ) {
     try {
-        var target = new Weather( req.params.lat, req.params.lon, ( req.params.alt || 0 ) );
+        var target = new Weather( req.params.lat, req.params.lon, ( req.params.alt || 0 ), req.params.model );
 
         target.visualize(( values, config ) => {
             res.json({ status: 'success', data: { values: values, config: config }});

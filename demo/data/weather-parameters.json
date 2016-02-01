@@ -1,0 +1,76 @@
+{
+    "parameters": {
+        "temperature": {
+            "#comment": "Range is based on my idea of what is physically bearable",
+            "rules": {
+                "color": {
+                    "min": "0",
+                    "max": "50",
+                    "unit": "c",
+                    "transform": "",
+                    "values": ["darkblue", "darkred"]
+                }
+            }
+        },
+        "pressure": {
+            "#comment": "Death valley average to mountain death zone of 8000m average (stdatm) pressures",
+            "rules": {
+                "color": {
+                    "min": "35700",
+                    "max": "113484",
+                    "unit": "hPA"
+                }
+            }
+        },
+        "precipitation": {
+            "#comment": "What's the max?",
+            "rules": {
+                "opacity": {
+                    "min": 0,
+                    "max": 100,
+                    "variable": "precipitation_rate",
+                },
+                "color": {
+                    "min": 0,
+                    "max": 100,
+                    "variable": "precipitation_frozen",
+                    "values": ["darkblue", "darkgreen"]
+                }
+            }
+        },
+        "clouds": {
+            "rules": {
+                "opacity": {
+                    "min": "0",
+                    "unit": "%",
+                    "max": "100",
+                    "variable": "opacity"
+                }
+            }
+        },
+        "storms": {
+            "min": "0",
+            "max"
+        },
+        "snow": {
+            "comment": "anything above 0 should start at 50% opacity?",
+            "rules": {
+                "opacity": {
+                    "min": "0",
+                    "max": "2",
+                    "unit": "m",
+                    "variable": "opacity"
+                }
+            }
+        },
+        "humidity": {
+            "rules": {
+                "color": {
+                    "min": "0",
+                    "max": "100",
+                    "unit": "%"
+                }
+            }
+        }
+    }
+}
