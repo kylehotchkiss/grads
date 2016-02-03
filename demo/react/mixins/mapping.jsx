@@ -1,6 +1,8 @@
 /* global L:true */
 
 var DEGREES = 180 / Math.PI;
+var chroma = require('chroma-js');
+var parameters = require('json!../../data/weather-parameters.json');
 
 module.exports = {
     clearMap() {
@@ -16,14 +18,49 @@ module.exports = {
         var place = this.state.views[ this.state.step ].place;
 
         if ( typeof frames[ this.state.step ] === 'undefined' ) {
+
+            var scale;
+
+            // Loop over our existing, not very well organized, GeoJSON
             layer = L.geoJson(points, {
                 pointToLayer: feature => {
-                    // IF TYPE = BLOCK
-                    // IF TYPE = MARKER
+                    // Check our weather-parameters.json config file for this variable
+                    if ( typeof parameters[this.state.metric] !== 'undefined' ) {
+                        var parameter = parameters[this.state.metric];
+                        var config = { weight: 0, clickable: false };
+                        var value = feature.properties.values[this.state.metric];
 
-                    if ( this.state.metric === 'temperature' ) {
-                        var kelvin = parseFloat(feature.properties.values.temperature);
-                        var english = ( kelvin - 273.15 ) * 1.8000 + 32.00;
+                        // Loop over all the rules for this variable in weather-parameters.json
+                        for ( var rule in parameter.rules ) {
+                            var action = parameter.rules[rule];
+
+                            // TODO: Probably not fast
+                            if ( action.transform ) {
+                                value = eval( action.transform );
+                            }
+
+                            if ( rule === 'color' ) {
+                                if ( !scale ) {
+                                    scale = chroma.scale( action.colors ).domain([ action.min, action.max ]);
+                                }
+
+                                config.fillColor = scale( value ).hex();
+                            } else if ( rule === 'opacity' ) {
+                                var range = action.max - action.min;
+                                var normalized = value - action.min;
+                                var percentage = normalized / range;
+                                config.fillOpacity = percentage * 0.65;
+                            }
+
+                            if ( typeof config.fillOpacity === 'undefined' ) {
+                                config.fillOpacity = 0.65;
+                            }
+
+                            if ( !config.fillColor ) {
+                                config.fillColor = "#000000";
+                            }
+
+                        }
 
                         return L.rectangle([[
                             feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
@@ -31,55 +68,7 @@ module.exports = {
                         ], [
                             feature.geometry.coordinates[1] + (this.state.gradsConfig.resolution / 2),
                             feature.geometry.coordinates[0] + (this.state.gradsConfig.resolution / 2)
-                        ]], {
-                            weight: 0,
-                            clickable: false,
-                            fillOpacity: 0.5,
-                            fillColor: this.color( 'temperature', english )
-                        });
-                    } else if ( this.state.metric === 'pressure' ) {
-                        return L.rectangle([[
-                            feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
-                            feature.geometry.coordinates[0] - (this.state.gradsConfig.resolution / 2)
-                        ], [
-                            feature.geometry.coordinates[1] + (this.state.gradsConfig.resolution / 2),
-                            feature.geometry.coordinates[0] + (this.state.gradsConfig.resolution / 2)
-                        ]], {
-                            weight: 0,
-                            clickable: false,
-                            fillOpacity: 0.5,
-                            fillColor: this.color( 'pressure', parseFloat(feature.properties.values.pressure) )
-                        });
-                    } else if ( this.state.metric === 'clouds' ) {
-                        var cover = ( parseFloat( feature.properties.values.clouds ) / 100 ) * .5;
-
-                        return L.rectangle([[
-                            feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
-                            feature.geometry.coordinates[0] - (this.state.gradsConfig.resolution / 2)
-                        ], [
-                            feature.geometry.coordinates[1] + (this.state.gradsConfig.resolution / 2),
-                            feature.geometry.coordinates[0] + (this.state.gradsConfig.resolution / 2)
-                        ]], {
-                            weight: 0,
-                            clickable: false,
-                            fillOpacity: cover,
-                            fillColor: '#000000'
-                        });
-                    } else if ( this.state.metric === 'snow' ) {
-                        var cover = (( parseFloat( feature.properties.values.snow_depth ) * 3.28084 ) / 2) * .5;
-
-                        return L.rectangle([[ // half
-                            feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
-                            feature.geometry.coordinates[0] - (this.state.gradsConfig.resolution / 2)
-                        ], [
-                            feature.geometry.coordinates[1] + (this.state.gradsConfig.resolution / 2),
-                            feature.geometry.coordinates[0] + (this.state.gradsConfig.resolution / 2)
-                        ]], {
-                            weight: 0,
-                            clickable: false,
-                            fillOpacity: cover,
-                            fillColor: '#0000FF'
-                        });
+                        ]], config);
                     } else if ( this.state.metric === 'wind' ) {
                         // Create three markers and set their icons to cssIcon
                         var vwind = feature.properties.values.wind_v;

@@ -12,7 +12,7 @@ module.exports = {
                     self.drawMap( false );
                 });
             });
-        }, 100);
+        }, 250);
 
         self.setState({
             animationID: animationID

@@ -100,7 +100,7 @@ class Grads {
         this.offset = 0;
         this.reducer = 0;
         this.counter = 0;
-        this.resolution = 60; // set via query string
+        this.resolution = 50; // set via query string
         this.incrementCounter = 0;
         this.model = models.noaa[ model ];
         this.time = moment().utc().subtract(this.offset, 'hours');

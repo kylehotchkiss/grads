@@ -1,75 +1,73 @@
 {
-    "parameters": {
-        "temperature": {
-            "#comment": "Range is based on my idea of what is physically bearable",
-            "rules": {
-                "color": {
-                    "min": "0",
-                    "max": "50",
-                    "unit": "c",
-                    "transform": "",
-                    "values": ["darkblue", "darkred"]
-                }
+    "temperature": {
+        "#comment": "Range is based on my idea of what is physically bearable",
+        "rules": {
+            "color": {
+                "min": "-40",
+                "max": "50",
+                "unit": "c",
+                "transform": "value - 273.15",
+                "colors": ["67a9cf", "#ef8a62"]
             }
-        },
-        "pressure": {
-            "#comment": "Death valley average to mountain death zone of 8000m average (stdatm) pressures",
-            "rules": {
-                "color": {
-                    "min": "35700",
-                    "max": "113484",
-                    "unit": "hPA"
-                }
+        }
+    },
+    "pressure": {
+        "#comment": "Death valley average to mountain death zone of 8000m average (stdatm) pressures",
+        "rules": {
+            "color": {
+                "min": "35700",
+                "max": "113484",
+                "unit": "hPA"
             }
-        },
-        "precipitation": {
-            "#comment": "What's the max?",
-            "rules": {
-                "opacity": {
-                    "min": 0,
-                    "max": 100,
-                    "variable": "precipitation_rate",
-                },
-                "color": {
-                    "min": 0,
-                    "max": 100,
-                    "variable": "precipitation_frozen",
-                    "values": ["darkblue", "darkgreen"]
-                }
+        }
+    },
+    "precipitation": {
+        "#comment": "What's the max?",
+        "rules": {
+            "opacity": {
+                "min": 0,
+                "max": 100,
+                "variable": "precipitation_rate"
+            },
+            "color": {
+                "min": 0,
+                "max": 100,
+                "variable": "precipitation_frozen",
+                "colors": ["darkblue", "darkgreen"]
             }
-        },
-        "clouds": {
-            "rules": {
-                "opacity": {
-                    "min": "0",
-                    "unit": "%",
-                    "max": "100",
-                    "variable": "opacity"
-                }
+        }
+    },
+    "clouds": {
+        "rules": {
+            "opacity": {
+                "min": "0",
+                "unit": "%",
+                "max": "100",
+                "variable": "opacity"
             }
-        },
-        "storms": {
-            "min": "0",
-            "max"
-        },
-        "snow": {
-            "comment": "anything above 0 should start at 50% opacity?",
-            "rules": {
-                "opacity": {
-                    "min": "0",
-                    "max": "2",
-                    "unit": "m",
-                    "variable": "opacity"
-                }
+        }
+    },
+    "storms": {
+        "min": "0",
+        "max": "0"
+    },
+    "snow": {
+        "comment": "anything above 0 should start at 50% opacity?",
+        "rules": {
+            "opacity": {
+                "min": "0",
+                "max": "2",
+                "unit": "m",
+                "variable": "opacity"
             }
-        },
-        "humidity": {
-            "rules": {
-                "color": {
-                    "min": "0",
-                    "max": "100",
-                    "unit": "%"
-                }
+        }
+    },
+    "humidity": {
+        "rules": {
+            "color": {
+                "min": "0",
+                "max": "100",
+                "unit": "%"
             }
         }
     }
