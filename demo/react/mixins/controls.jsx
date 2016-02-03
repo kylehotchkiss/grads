@@ -148,6 +148,13 @@ module.exports = {
                             Wind
                         </div>
                     </div>
+
+                    <div onClick={ this.changeMetric.bind( this, 'precipitation') }  className="col-sm-3 metric">
+                        <div className={ this.state.metric === 'precipitation' ? 'selected' : '' }>
+                            <i className="ss-rain"></i>
+                            Precipitation
+                        </div>
+                    </div>
                 </div>
             </div>
         )
@@ -173,7 +180,7 @@ module.exports = {
                         { this.renderDropdowns( 0 ) }
 
                         <div className="col-sm-6">
-                            <Loader loaded={ false } top="0" scale={.85}></Loader>
+                            <Loader loaded={ false } top="0" scale={0.85}></Loader>
                         </div>
                     </div>
                 </div>

@@ -26,14 +26,15 @@
         "rules": {
             "opacity": {
                 "min": 0,
-                "max": 100,
+                "max": 7.5,
+                "transform": "value * 3600",
                 "variable": "precipitation_rate"
             },
             "color": {
                 "min": 0,
                 "max": 100,
                 "variable": "precipitation_frozen",
-                "colors": ["darkblue", "darkgreen"]
+                "colors": ["darkgreen", "darkblue"]
             }
         }
     },
@@ -42,8 +43,7 @@
             "opacity": {
                 "min": "0",
                 "unit": "%",
-                "max": "100",
-                "variable": "opacity"
+                "max": "100"
             }
         }
     },
@@ -57,8 +57,7 @@
             "opacity": {
                 "min": "0",
                 "max": "2",
-                "unit": "m",
-                "variable": "opacity"
+                "unit": "m"
             }
         }
     },

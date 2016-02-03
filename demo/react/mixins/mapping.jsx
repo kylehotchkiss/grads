@@ -34,6 +34,11 @@ module.exports = {
                         for ( var rule in parameter.rules ) {
                             var action = parameter.rules[rule];
 
+                            // We can override the selected variable if the visualization requires more dimensions
+                            if ( action.variable ) {
+                                value = feature.properties.values[ action.variable ];
+                            }
+
                             // TODO: Probably not fast
                             if ( action.transform ) {
                                 value = eval( action.transform );
