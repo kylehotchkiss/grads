@@ -43,7 +43,8 @@
         },
         "options": {
             "fidelity": "high",
-            "resolution": 0.25,
+            "resolution_x": 0.192,
+            "resolution_y": 0.185,
             "quarterly": false,
             "degreeseast": false,
             "modeltmpl": "{{ model.slug }}/{{ model.name }}{{ time.format('YYYYMMDD') }}/{{ model.slug }}_{{ hourset }}z.ascii?"

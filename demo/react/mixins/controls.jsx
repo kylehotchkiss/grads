@@ -38,15 +38,15 @@ module.exports = {
                 <h3>Forecast Model</h3>
 
                 <select ref="model" onChange={ this.changeModel } defaultValue={ this.state.model } className="form-control">
-                    <optgroup name="Global">
-                        <option name="gfs">GFS: Global Forecast System</option>
-                        <option name="cmcens" disabled>CMCENS: Canada Meteorological Center Ensemble</option>
-                        <option name="cmcens" disabled>GENS: Global Ensemble Forecast System</option>
+                    <optgroup label="Global">
+                        <option value="gfs">GFS: Global Forecast System</option>
+                        <option value="cmcens" disabled>CMCENS: Canada Meteorological Center Ensemble</option>
+                        <option value="cmcens" disabled>GENS: Global Ensemble Forecast System</option>
                     </optgroup>
-                    <optgroup name="USA Only">
-                        <option name="rap">RAP: Rapid Refresh</option>
-                        <option name="ruc" disabled>RUC: Rapid Update Cycle</option>
-                        <option name="hrr" disabled>HRRR: High Resolution Rapid Update Cycle</option>
+                    <optgroup label="USA Only">
+                        <option value="rap">RAP: Rapid Refresh</option>
+                        <option value="ruc" disabled>RUC: Rapid Update Cycle</option>
+                        <option value="hrr" disabled>HRRR: High Resolution Rapid Update Cycle</option>
                     </optgroup>
                 </select>
             </div>
@@ -180,7 +180,7 @@ module.exports = {
                         { this.renderDropdowns( 0 ) }
 
                         <div className="col-sm-6">
-                            <Loader loaded={ false } top="0" scale={0.85}></Loader>
+                            <Loader loaded={ false } top="0" scale={ 0.85 }></Loader>
                         </div>
                     </div>
                 </div>

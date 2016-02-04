@@ -67,12 +67,20 @@ module.exports = {
 
                         }
 
+                        var resolution = this.state.gradsConfig.resolution;
+                        var resolution_x = this.state.gradsConfig.resolution_x;
+                        var resolution_y = this.state.gradsConfig.resolution_y;
+
+                        console.log( resolution )
+                        console.log( resolution_x )
+                        console.log( resolution_y )
+
                         return L.rectangle([[
-                            feature.geometry.coordinates[1] - (this.state.gradsConfig.resolution / 2),
-                            feature.geometry.coordinates[0] - (this.state.gradsConfig.resolution / 2)
+                            feature.geometry.coordinates[1] - ( ( resolution_y || resolution ) / 2 ),
+                            feature.geometry.coordinates[0] - ( ( resolution_x || resolution ) / 2 )
                         ], [
-                            feature.geometry.coordinates[1] + (this.state.gradsConfig.resolution / 2),
-                            feature.geometry.coordinates[0] + (this.state.gradsConfig.resolution / 2)
+                            feature.geometry.coordinates[1] + ( ( resolution_y || resolution ) / 2 ),
+                            feature.geometry.coordinates[0] + ( ( resolution_x || resolution ) / 2 )
                         ]], config);
                     } else if ( this.state.metric === 'wind' ) {
                         // Create three markers and set their icons to cssIcon

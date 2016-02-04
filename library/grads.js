@@ -204,10 +204,14 @@ class Grads {
     //
     config() {
         var resolution = this.reducer ? this.model.options.resolution * this.reducer : this.model.options.resolution;
+        var resolution_x = this.reducer ? this.model.options.resolution_x * this.reducer : this.model.options.resolution_x;
+        var resolution_y = this.reducer ? this.model.options.resolution_y * this.reducer : this.model.options.resolution_y;
 
         return {
             offset: this.offset, // backwards iterations to reach dataset (eg 1)
-            resolution: resolution // deg
+            resolution: resolution,
+            resolution_x: resolution_x,
+            resolution_y: resolution_y // deg
         }
     }
 

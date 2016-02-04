@@ -12,6 +12,7 @@ var ForecastController = React.createClass({
         return {
             step: 0,
             place: '',
+            model: 'gfs',
             loaded: false,
             metric: 'clouds',
             animationID: false,
@@ -62,7 +63,7 @@ var ForecastController = React.createClass({
             frames: [],
             place: this.refs.place.value
         }, () => {
-            this.requestPoints( this.refs.place.value );
+            this.requestPoints();
         });
     },
 
@@ -86,14 +87,26 @@ var ForecastController = React.createClass({
         })
     },
 
-    requestPoints( placeID ) {
+    changeModel() {
+        this.endAnimation();
+
+        this.setState({
+            step: 0,
+            frames: [],
+            model: this.refs.model.value
+        }, () => {
+            this.requestPoints();
+        });
+    },
+
+    requestPoints() {
         var country = _.find( countries, country => {
             // Dumb trick to seperate states & countries with matching names
-            return country.name + ' ' === placeID;
+            return country.name + ' ' === this.state.place;
         });
 
         var state = _.find( states, state => {
-            return state.name === placeID;
+            return state.name === this.state.place;
         });
 
         var place = country || state;
@@ -106,7 +119,7 @@ var ForecastController = React.createClass({
 
             console.time('GET');
 
-            jQuery.ajax({ url: `/weather/visualize/${lat}/${lon}/0`, success: response => {
+            jQuery.ajax({ url: `/weather/visualize/${lat}/${lon}/0/${this.state.model}`, success: response => {
                 console.timeEnd('GET');
                 console.time('PARSE');
 
