@@ -10,7 +10,7 @@ var Redis = require("redis");
 var async = require('async');
 var moment = require('moment');
 var request = require('request');
-var dictionary = require('../data/variable-mapping.json').gfs;
+var Dictionary = require('../data/variable-mapping.json');
 var models = { noaa: require('../data/noaa-models.json') };
 
 var redis;
@@ -91,7 +91,7 @@ class Grads {
         // Verify that model exists
         if ( typeof models.noaa[model] === "undefined" ) {
             // throw new Error( model + " is not a valid weather model.");
-            model = "rap";
+            model = "gfs";
         }
 
         // Load the model configuration
@@ -103,6 +103,7 @@ class Grads {
         this.resolution = 50; // set via query string
         this.incrementCounter = 0;
         this.model = models.noaa[ model ];
+        this.dictionary = Dictionary[ model || 'gfs' ];
         this.time = moment().utc().subtract(this.offset, 'hours');
         this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
 
@@ -251,7 +252,9 @@ class Grads {
         this.time = moment().utc().subtract(this.offset, 'hours');
         this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
 
-        // console.log( 'Time Travel Iteration: ' + this.incrementCounter );
+        if ( this.incrementCounter > 25 ) {
+            throw new Error('GrADS overflow error');
+        }
     }
 
 
@@ -335,9 +338,9 @@ class Grads {
 
         // Generate the entire URL, adding altitude if set
         if ( altitude ) {
-           return this.model.base + model + ( dictionary[ variable ] || variable ) + altitude + subset;
+           return this.model.base + model + ( this.dictionary[ variable ] || variable ) + altitude + subset;
         } else {
-           return this.model.base + model + ( dictionary[ variable ] || variable ) + subset;
+           return this.model.base + model + ( this.dictionary[ variable ] || variable ) + subset;
         }
     }
 
@@ -406,6 +409,7 @@ class Grads {
             }
 
             if ( !key ) {
+                console.log( lines )
                 throw new Error('Checking for `time` variable inside of Grads response failed - unable to assign key names');
             }
 
@@ -543,7 +547,8 @@ class Grads {
        var url = this.build( variable, includeAlt );
 
        // Debug:
-       // console.log( url );
+       //console.log( this.incrementCounter );
+       //console.log( url );
 
        var online = () => {
            request( url, function( error, response, body ) {
@@ -583,12 +588,19 @@ class Grads {
     *
     */
     bulkFetch( variables, callback ) {
-        async.map( variables, ( variable, callback ) => {
+        async.mapSeries( variables, ( variable, callback ) => {
             console.time(variable);
-            this.fetch( variable, false, values => {
-                console.timeEnd(variable);
-                callback( false, values );
-            });
+
+            if ( typeof this.dictionary[ variable ] !== 'undefined' ) {
+                this.fetch( variable, false, values => {
+                    console.timeEnd(variable);
+                    callback( false, values );
+                });
+            } else {
+                console.error( variable + ' is not available in ' + this.model.name );
+
+                callback();
+            }
         }, ( error, results ) => {
             if ( !error ) {
                 var ensemble = [];

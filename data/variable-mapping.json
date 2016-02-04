@@ -11,5 +11,15 @@
         "snow_depth": "snodsfc",
         "precipitation_rate": "pratesfc",
         "precipitation_frozen": "cpofpsfc"
+    },
+    "rap": {
+        "humidity": "rh2m",
+        "gusts": "gustsfc",
+        "clouds": "tcdcclm",
+        "dewpoint": "dpt2m",
+        "pressure": "pressfc",
+        "temperature": "tmpsfc",
+        "snow_depth": "snodsfc",
+        "precipitation_rate": "pratesfc"
     }
 }

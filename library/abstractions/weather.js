@@ -8,8 +8,8 @@ var Grads = require('../grads.js');
 var conversions = require('../conversions.js');
 
 class Weather extends Grads {
-    constructor( lat, lon, alt ) {
-        super( lat, lon, alt, 'gfs' );
+    constructor( lat, lon, alt, model ) {
+        super( lat, lon, alt, model );
     }
 
     visualize( callback ) {
