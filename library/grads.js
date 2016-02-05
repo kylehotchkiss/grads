@@ -6,6 +6,7 @@
 'use strict';
 
 var _ = require('lodash');
+var Gauge = require("gauge");
 var Redis = require("redis");
 var async = require('async');
 var moment = require('moment');
@@ -84,6 +85,16 @@ var matches = function( string, regex, index ) {
 
     return matches;
 };
+
+//
+// Store value in Redis cache, if Redis exists. Set expiration.
+//
+var cache = function( url, values ) {
+    if ( redis ) {
+        redis.set( 'request:' + url, JSON.stringify(values) );
+        redis.expire( 'request:' + url , 1800 );
+    }
+}
 
 
 class Grads {
@@ -365,6 +376,7 @@ class Grads {
             if ( lines[11].indexOf('Invalid Parameter Exception') ) {
                 if ( lines[11].indexOf('is not an available dataset') ) {
                     timetravel();
+                    cache( url, false );
                 } else {
                     console.error( lines[11] );
                     throw new Error( 'GrADS parameter error' );
@@ -532,9 +544,7 @@ class Grads {
             }
 
             // Save processed result into redis
-            if ( redis ) {
-                redis.set( 'request:' + url, JSON.stringify(values) );
-            }
+            cache( url, values );
 
             // console.log( 'Requests:' + this.counter );
             callback( values, this.config() );
@@ -576,6 +586,10 @@ class Grads {
            redis.get('request:' + url, function( error, values ) {
                if ( values ) {
                    cached( JSON.parse( values ) );
+               } else if ( values === false ) {
+                   // Time Travel
+                   self.increment();
+                   self.fetch( variable, includeAlt, callback );
                } else {
                    online();
                }
@@ -592,16 +606,20 @@ class Grads {
     *
     */
     bulkFetch( variables, callback ) {
-        async.mapSeries( variables, ( variable, callback ) => {
-            console.time(variable);
+        var i = 0;
+        var total = variables.length;
+        var gauge = new Gauge();
 
+        async.mapSeries( variables, ( variable, callback ) => {
             if ( typeof this.dictionary[ variable ] !== 'undefined' ) {
+                var name = this.model.name + ' ↦ ' + this.dictionary[ variable ];
+                gauge.show( name , ( i / total ) );
+
                 this.fetch( variable, false, values => {
-                    console.timeEnd(variable);
-                    callback( false, values );
+                    i++; callback( false, values );
                 });
             } else {
-                console.error( variable + ' is not available in ' + this.model.name );
+                //console.error( variable + ' is not available in ' + this.model.name );
 
                 callback();
             }
@@ -613,6 +631,7 @@ class Grads {
                     _.merge(ensemble, results[i]);
                 }
 
+                gauge.hide();
                 callback( ensemble, this.config() );
             }
         });

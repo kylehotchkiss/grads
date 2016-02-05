@@ -71,10 +71,6 @@ module.exports = {
                         var resolution_x = this.state.gradsConfig.resolution_x;
                         var resolution_y = this.state.gradsConfig.resolution_y;
 
-                        console.log( resolution )
-                        console.log( resolution_x )
-                        console.log( resolution_y )
-
                         return L.rectangle([[
                             feature.geometry.coordinates[1] - ( ( resolution_y || resolution ) / 2 ),
                             feature.geometry.coordinates[0] - ( ( resolution_x || resolution ) / 2 )
@@ -89,6 +85,13 @@ module.exports = {
 
                         var heading = ( 270 - ( Math.atan2( vwind, uwind ) * DEGREES ) ) % 360;
                         var speed = Math.sqrt( Math.pow(Math.abs(vwind), 2) + Math.pow(Math.abs(uwind), 2) );
+
+                        console.log( vwind );
+                        console.log( uwind );
+
+                        console.log( heading );
+                        console.log( speed );
+                        console.log( ' ' );
 
                         return L.marker([ feature.geometry.coordinates[1], feature.geometry.coordinates[0] ], {
                             icon: L.divIcon({
