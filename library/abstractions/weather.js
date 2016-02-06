@@ -4,7 +4,7 @@
 //
 'use strict';
 
-var Grads = require('../grads.js');
+var Grads = require('../../index.js');
 var conversions = require('../conversions.js');
 
 class Weather extends Grads {

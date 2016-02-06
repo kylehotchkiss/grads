@@ -1,74 +1,149 @@
 //
-// index.js
-// Loads a quick demo for GrADS stuff
+// grads.js
+// This file is the primary interface with NOAA's GrADS dataset.
 //
 
 'use strict';
 
-var _ = require('lodash');
-var express = require('express');
-var app = express();
+var redis;
+var Redis = require('redis');
+var moment = require('moment');
+var request = require('request');
+var Dictionary = require('./data/variable-mapping.json');
+var models = { noaa: require('./data/noaa-models.json') };
 
-var Grads = require('./library/grads.js');
-var Sea = require('./library/abstractions/sea.js');
-var Weather = require('./library/abstractions/weather.js');
+var post = require('./library/post.js');
+var request = require('./library/request.js');
+var utilities = require('./library/utilities.js');
 
-var Conditions = require("./library/conditions.js");
+if ( true ) {
+    redis = Redis.createClient();
+}
 
-app.use( express.static('public') );
-
-app.get('/conditions/:lat/:lon/:alt/:model?', function ( req, res ) {
-    try {
-        var target = new Conditions( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || "gfs" ) );
-
-        target.temp(function( temp ) {
-            target.wind(function( speed, heading ) {
-                res.json({
-                    conditions: {
-                        temp: temp,
-                        windSpeed: speed,
-                        windHeading: heading
-                    },
-                    meta: {
-                        requested: {
-                            lat: req.params.lat,
-                            lon: req.params.lon,
-                            alt: req.params.alt
-                        },
-                        actual: {},
-                        grads: {},
-                    }
-                });
-            });
-        });
-    } catch ( error ) {
-        res.json({ status: 'error', message: error.message });
+var Grads = function( lat, lon, alt, model ) {
+    // Verify that model exists
+    if ( typeof models.noaa[model] === 'undefined' ) {
+        // throw new Error( model + ' is not a valid weather model.');
+        model = 'gfs';
     }
-});
 
-app.get('/sea/:lat/:lon', function ( req, res ) {
-    var target = new Sea( req.params.lat, req.params.lon );
 
-    console.time("Catching some Waves");
-    target.wavesDetail(function( results ) {
-        console.timeEnd("Catching some Waves");
-        res.json( results );
-    });
-});
+    // Load functions
+    this.remap = utilities.remap;
+    this.cache = utilities.cache;
+    this.mdsave = utilities.mdsave;
+    this.config = utilities.config;
+    this.matches = utilities.matches;
+    this.increment = utilities.increment;
+    this.parameters = utilities.parameters;
+    this.build = request.build;
+    this.fetch = request.fetch;
+    this.bulkFetch = request.bulkFetch;
+    this.parse = post.parse;
+    this.flatten = post.flatten;
 
-app.get('/weather/visualize/:lat/:lon/:alt/:model?', function ( req, res ) {
-    try {
-        var target = new Weather( req.params.lat, req.params.lon, ( req.params.alt || 0 ), req.params.model );
 
-        target.visualize(( values, config ) => {
-            res.json({ status: 'success', data: { values: values, config: config }});
-        });
-    } catch ( error ) {
-        res.json({ status: 'error', message: error.message });
+    // Load the model configuration
+    this.lat = [];
+    this.lon = [];
+    this.offset = 0;
+    this.reducer = 0;
+    this.counter = 0;
+    this.resolution = 50; // set via query string
+    this.incrementCounter = 0; // Class wide iteration offset to prevent garbage requests
+    this.model = models.noaa[ model ]; // Load (known) NOAA model configuration
+    this.dictionary = Dictionary[ model || 'gfs' ]; // Load a common set of variable names for accessing weather
+    this.time = moment().utc().subtract(this.offset, 'hours');
+    this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
+
+    // Read in ranges for Latitude, Longitude, and Altitude
+    // Verify ranges are small:large
+    // TODO: Can make this more robust in future by flipping them for user
+    if ( lat.indexOf(':') !== -1 ) {
+        lat = lat.split(':');
+        lat[0] = parseFloat(lat[0]);
+        lat[1] = parseFloat(lat[1]);
+        var diffLat = ( lat[1] - lat[0] ) / this.model.options.resolution;
+
+        if ( diffLat > this.resolution ) {
+            this.reducer = Math.ceil(diffLat / this.resolution);
+        }
+
+        if ( lat[0] > lat[1] ) {
+            throw new Error('Smaller Latitude must occur first in range');
+        }
+    } else {
+        lat = [ lat ];
     }
-});
+
+    if ( lon.indexOf(':') !== -1 ) {
+        lon = lon.split(':');
+        lon[0] = parseFloat(lon[0]);
+        lon[1] = parseFloat(lon[1]);
+        var diffLon = (lon[1] - lon[0]) / this.model.options.resolution;
+
+        if ( diffLon > this.resolution ) {
+            var reducer = Math.ceil( diffLon / this.resolution );
+
+            if ( reducer > this.reducer ) {
+                this.reducer = reducer;
+            }
+        }
+
+        if ( lon[0] > lon[1] ) {
+            throw new Error('Smaller Longitude must occur first in range');
+        }
+    } else {
+        lon = [ lon ];
+    }
+
+    if ( alt.indexOf(':') !== -1 ) {
+        //alt = alt.split(':');
+
+        //if ( parseFloat(alt[0]) > parseFloat(alt[1]) ) {
+        //    throw new Error('Smaller Altitude must occur first in range');
+        //}
+
+        throw new Error('Altitude sets are not currently supported due to Grads complexities');
+    } else {
+        alt = [ alt ];
+    }
+
+    // If we're using a degreeseast model, convert the longitude to 0-360deg
+    if ( this.model.options.degreeseast ) {
+        for ( var i in lon ) {
+            if ( lon[i] < 0 ) {
+                lon[i] = ( 360 - ( parseFloat(lon[i]) * -1 ) );
+            }
+        }
+
+        // Reverse Parameter order if needed
+        if ( lon[0] > lon[1] ) {
+            var immediate = lon[0];
+            lon[0] = lon[1];
+            lon[1] = immediate;
+        }
+    }
 
 
-app.listen(process.env.PORT || 3000, function() {
-    console.log('Welcome to grads; check me out http://localhost:3000');
-});
+    // Validate Boundaries and set grads-friendly coordinate sets
+    for ( var j in lat ) {
+        if ( lat[j] < this.model.range.latMin || lat[j] > this.model.range.latMax ) {
+            throw new Error('Latitude is out of model bounds');
+        }
+
+        this.lat.push( this.remap( lat[j], [ this.model.range.latMin, this.model.range.latMax ] , [ 0, this.model.steps.lat ], true ) );
+    }
+
+    for ( var k in lon ) {
+        if ( lon[k] < this.model.range.lonMin || lon[k] > this.model.range.lonMax ) {
+            throw new Error('Longitude is out of model bounds');
+        }
+
+        this.lon.push( this.remap( lon[k], [ this.model.range.lonMin, this.model.range.lonMax ], [ 0, this.model.steps.lon ], true ) );
+    }
+
+    this.alt = alt;
+};
+
+module.exports = Grads;

@@ -1,6 +1,6 @@
 /* jshint esnext:true */
 'use strict';
-var Grads = require('./grads.js');
+var Grads = require('../../index.js');
 
 //var RADIANS = Math.PI / 180;
 var DEGREES = 180 / Math.PI;
