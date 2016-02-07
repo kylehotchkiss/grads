@@ -190,3 +190,47 @@ exports.parse = function( url, variable, content, callback, timetravel ) {
         callback( values, this.config() );
     }
 };
+
+exports.flatten = function() {
+    var index;
+    var output = {};
+
+    // Y'all ready for this?
+    //
+    // ░░░░░▄▄▄▄▀▀▀▀▀▀▀▀▄▄▄▄▄▄░░░░░░░
+    // ░░░░░█░░░░▒▒▒▒▒▒▒▒▒▒▒▒░░▀▀▄░░░░
+    // ░░░░█░░░▒▒▒▒▒▒░░░░░░░░▒▒▒░░█░░░
+    // ░░░█░░░░░░▄██▀▄▄░░░░░▄▄▄░░░░█░░
+    // ░▄▀▒▄▄▄▒░█▀▀▀▀▄▄█░░░██▄▄█░░░░█░
+    // █░▒█▒▄░▀▄▄▄▀░░░░░░░░█░░░▒▒▒▒▒░█
+    // █░▒█░█▀▄▄░░░░░█▀░░░░▀▄░░▄▀▀▀▄▒█
+    // ░█░▀▄░█▄░█▀▄▄░▀░▀▀░▄▄▀░░░░█░░█░
+    // ░░█░░░▀▄▀█▄▄░█▀▀▀▄▄▄▄▀▀█▀██░█░░
+    // ░░░█░░░░██░░▀█▄▄▄█▄▄█▄████░█░░░
+    // ░░░░█░░░░▀▀▄░█░░░█░█▀██████░█░░
+    // ░░░░░▀▄░░░░░▀▀▄▄▄█▄█▄█▄█▄▀░░█░░
+    // ░░░░░░░▀▄▄░▒▒▒▒░░░░░░░░░░▒░░░█░
+    // ░░░░░░░░░░▀▀▄▄░▒▒▒▒▒▒▒▒▒▒░░░░█░
+    // ░░░░░░░░░░░░░░▀▄▄▄▄▄░░░░░░░░█░░
+    //
+    for ( var i in this.results ) {
+        for ( var j in this.results[i] ) {
+            for ( var k in this.results[i][j] ) {
+                if ( Array.isArray( this.results[i][j][k] ) ) {
+                    for ( var l in this.results[i][j][k] ) {
+                        index = `[${i}][${j}][${k}][${l}]`;
+
+                        output[ index ] = this.results[i][j][k][l];
+                    }
+                } else {
+                    var result = this.results[i][j][k];
+                    index = `[${ +moment( result.time ) }][${ result.lat }][${ result.lon }]`;
+
+                    output[ index ] = result.values;
+                }
+            }
+        }
+    }
+
+    return output;
+};

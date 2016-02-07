@@ -58,6 +58,8 @@ app.get('/weather/visualize/:lat/:lon/:alt/:model?', function ( req, res ) {
         var target = new Weather( req.params.lat, req.params.lon, ( req.params.alt || 0 ), req.params.model );
 
         target.visualize(( values, config ) => {
+            target.flatten( values );
+
             res.json({ status: 'success', data: { values: values, config: config }});
         });
     } catch ( error ) {

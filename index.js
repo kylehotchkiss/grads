@@ -49,6 +49,7 @@ var Grads = function( lat, lon, alt, model ) {
     this.offset = 0;
     this.reducer = 0;
     this.counter = 0;
+    this.results = {};
     this.resolution = 50; // set via query string
     this.incrementCounter = 0; // Class wide iteration offset to prevent garbage requests
     this.model = models.noaa[ model ]; // Load (known) NOAA model configuration

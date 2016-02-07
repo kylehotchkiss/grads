@@ -108,9 +108,15 @@ exports.build = function( variable, includeAlt ) {
 //
 // Build the GrADS request URL for the given resource
 //
-exports.fetch = function( variable, includeAlt, callback ) {
+exports.fetch = function( variable, includeAlt, parentCallback ) {
     var self = this;
     var url = this.build( variable, includeAlt );
+
+    var callback = ( values, config ) => {
+        this.results = values;
+
+        parentCallback( values, config );
+    };
 
     // Debug:
     //console.log( this.incrementCounter );
@@ -174,16 +180,19 @@ exports.bulkFetch = function( variables, callback ) {
 
              callback();
          }
-     }, ( error, results ) => {
-         if ( !error ) {
-             var ensemble = [];
+    }, ( error, results ) => {
+        if ( !error ) {
+            var ensemble = [];
 
-             for ( var i in results ) {
-                 _.merge(ensemble, results[i]);
-             }
+            for ( var i in results ) {
+                _.merge(ensemble, results[i]);
+            }
 
-             gauge.hide();
-             callback( ensemble, this.config() );
-         }
-     });
+            gauge.hide();
+
+            this.results = ensemble;
+
+            callback( ensemble, this.config() );
+        }
+    });
 };
