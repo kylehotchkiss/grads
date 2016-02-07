@@ -44,6 +44,7 @@ var Grads = function( lat, lon, alt, model ) {
 
 
     // Load the model configuration
+    this.alt = [];
     this.lat = [];
     this.lon = [];
     this.offset = 0;
@@ -60,7 +61,7 @@ var Grads = function( lat, lon, alt, model ) {
     // Read in ranges for Latitude, Longitude, and Altitude
     // Verify ranges are small:large
     // TODO: Can make this more robust in future by flipping them for user
-    if ( lat.indexOf(':') !== -1 ) {
+    if ( typeof lat === 'string' && lat.indexOf(':') !== -1 ) {
         lat = lat.split(':');
         lat[0] = parseFloat(lat[0]);
         lat[1] = parseFloat(lat[1]);
@@ -77,7 +78,7 @@ var Grads = function( lat, lon, alt, model ) {
         lat = [ lat ];
     }
 
-    if ( lon.indexOf(':') !== -1 ) {
+    if ( typeof lon === 'string' && lon.indexOf(':') !== -1 ) {
         lon = lon.split(':');
         lon[0] = parseFloat(lon[0]);
         lon[1] = parseFloat(lon[1]);
@@ -98,7 +99,7 @@ var Grads = function( lat, lon, alt, model ) {
         lon = [ lon ];
     }
 
-    if ( alt.indexOf(':') !== -1 ) {
+    if ( typeof alt === 'string' && alt.indexOf(':') !== -1 ) {
         //alt = alt.split(':');
 
         //if ( parseFloat(alt[0]) > parseFloat(alt[1]) ) {
