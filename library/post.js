@@ -227,6 +227,9 @@ exports.flatten = function() {
                     index = `[${ +moment( result.time ) }][${ result.lat }][${ result.lon }]`;
 
                     output[ index ] = result.values;
+                    
+                    // We need time too
+                    output[ index ].time = result.time;
                 }
             }
         }

@@ -87,6 +87,7 @@ exports.cache = function( url, values ) {
 // Returns auto-configuration values for the current request
 // (eg return resolution value so map knows how big blocks should be)
 //
+// TODO: Switch to resolutionX, resolutionY, resolutionZ
 exports.config = function() {
     var resolution = this.reducer ? this.model.options.resolution * this.reducer : this.model.options.resolution;
     var resolution_x = this.reducer ? this.model.options.resolution_x * this.reducer : this.model.options.resolution_x;

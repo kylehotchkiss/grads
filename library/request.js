@@ -141,10 +141,10 @@ exports.fetch = function( variable, includeAlt, parentCallback ) {
     };
 
     if ( redis ) {
-        redis.get('request:' + url, function( error, values ) {
+        redis.get('request:' + url, function( error, values ) {        
             if ( values ) {
                 cached( JSON.parse( values ) );
-            } else if ( values === false ) {
+            } else if ( values === "false" ) { // :troll:
                 // Time Travel
                 self.increment();
                 self.fetch( variable, includeAlt, callback );
