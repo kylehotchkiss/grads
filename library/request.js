@@ -141,13 +141,14 @@ exports.fetch = function( variable, includeAlt, parentCallback ) {
     };
 
     if ( redis ) {
-        redis.get('request:' + url, function( error, values ) {        
-            if ( values ) {
-                cached( JSON.parse( values ) );
-            } else if ( values === "false" ) { // :troll:
+        redis.get('request:' + url, function( error, values ) {
+            // TODO: Why does redis cast false differently sometimes?
+            if ( values === false || values === 'false' ) {
                 // Time Travel
                 self.increment();
                 self.fetch( variable, includeAlt, callback );
+            } else if ( values ) {
+                cached( JSON.parse( values ) );
             } else {
                 online();
             }

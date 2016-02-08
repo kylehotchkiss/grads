@@ -71,6 +71,10 @@ var Grads = function( lat, lon, alt, model ) {
             this.reducer = Math.ceil(diffLat / this.resolution);
         }
 
+        if ( isNaN( lat[0] ) || isNaN( lat[1] ) ) {
+            throw new Error('Invalid Latitude value was set');
+        }
+
         if ( lat[0] > lat[1] ) {
             throw new Error('Smaller Latitude must occur first in range');
         }
@@ -92,6 +96,10 @@ var Grads = function( lat, lon, alt, model ) {
             }
         }
 
+        if ( isNaN( lon[0] ) || isNaN( lon[1] ) ) {
+            throw new Error('Invalid Longitude value was set');
+        }
+
         if ( lon[0] > lon[1] ) {
             throw new Error('Smaller Longitude must occur first in range');
         }
@@ -104,6 +112,10 @@ var Grads = function( lat, lon, alt, model ) {
 
         //if ( parseFloat(alt[0]) > parseFloat(alt[1]) ) {
         //    throw new Error('Smaller Altitude must occur first in range');
+        //}
+
+        //if ( lon[0] > lon[1] ) {
+        //    throw new Error('Smaller Longitude must occur first in range');
         //}
 
         throw new Error('Altitude sets are not currently supported due to Grads complexities');
