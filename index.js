@@ -76,7 +76,11 @@ var Grads = function( lat, lon, alt, model ) {
         }
 
         if ( lat[0] > lat[1] ) {
-            throw new Error('Smaller Latitude must occur first in range');
+            var intermediate = lat[0];
+            lat[0] = lat[1];
+            lat[1] = intermediate;
+
+            //throw new Error('Smaller Latitude must occur first in range');
         }
     } else {
         lat = [ lat ];
@@ -101,7 +105,11 @@ var Grads = function( lat, lon, alt, model ) {
         }
 
         if ( lon[0] > lon[1] ) {
-            throw new Error('Smaller Longitude must occur first in range');
+            var intermediate = lon[0];
+            lon[0] = lon[1];
+            lon[1] = intermediate;
+
+            //throw new Error('Smaller Longitude must occur first in range');
         }
     } else {
         lon = [ lon ];
