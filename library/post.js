@@ -1,6 +1,7 @@
 'use strict';
 
 var moment = require('moment');
+var conversions = require('./conversions.js');
 
 //
 // Read the GrADS response and decode it
@@ -116,6 +117,10 @@ exports.parse = function( url, variable, content, callback, timetravel ) {
                             refvalues[m] = -1 * ( 360 - refvalues[m] );
                         }
                     }
+                } else if ( refname === 'lev' ) {
+                    for ( var n in refvalues ) {
+                        refvalues[n] = conversions.altitude( refvalues[n] ).toFixed(2);
+                    }
                 }
 
                 variables[ refname ] = refvalues;
@@ -135,7 +140,7 @@ exports.parse = function( url, variable, content, callback, timetravel ) {
         for ( var n in values ) {
             for ( var o in values[n] ) {
                 for ( var p in values[n][o] ) {
-                    if ( typeof p === 'object' ) {
+                    if ( typeof values[n][o][p] === 'object' ) {
                         for ( var q in values[n][o][p] ) {
                             timeRef = n;
                             altRef = o;
@@ -147,7 +152,7 @@ exports.parse = function( url, variable, content, callback, timetravel ) {
                             for ( var r in variables ) {
                                 if ( r === 'time' ) {
                                     primed.time = variables[r][timeRef];
-                                } else if ( r === 'alt' ) {
+                                } else if ( r === 'lev' ) {
                                     primed.alt = variables[r][altRef];
                                 } else if ( r === 'lat' ) {
                                     primed.lat = variables[r][latRef];
@@ -168,8 +173,6 @@ exports.parse = function( url, variable, content, callback, timetravel ) {
                         for ( var t in variables ) {
                             if ( t === 'time' ) {
                                 primed.time = variables[t][timeRef];
-                            } else if ( t === 'alt' ) {
-                                primed.alt = variables[t][altRef];
                             } else if ( t === 'lat' ) {
                                 primed.lat = variables[t][latRef];
                             } else if ( t === 'lon' ) {
@@ -213,12 +216,16 @@ exports.flatten = function() {
     // ░░░░░░░░░░▀▀▄▄░▒▒▒▒▒▒▒▒▒▒░░░░█░
     // ░░░░░░░░░░░░░░▀▄▄▄▄▄░░░░░░░░█░░
     //
+
+    //console.log( JSON.stringify( this.results, null, 4 ) );
+
     for ( var i in this.results ) {
         for ( var j in this.results[i] ) {
             for ( var k in this.results[i][j] ) {
-                if ( Array.isArray( this.results[i][j][k] ) ) {
+                if ( typeof this.results[i][j][k].values === 'undefined' && Object.keys( this.results[i][j][k] ).length ) {
                     for ( var l in this.results[i][j][k] ) {
-                        index = `[${i}][${j}][${k}][${l}]`;
+                        var result = this.results[i][j][k][l];
+                        index = `[${ +moment( result.time ) }][${ result.alt }][${ result.lat }][${ result.lon }]`;
 
                         output[ index ] = this.results[i][j][k][l];
                     }
@@ -227,7 +234,7 @@ exports.flatten = function() {
                     index = `[${ +moment( result.time ) }][${ result.lat }][${ result.lon }]`;
 
                     output[ index ] = result.values;
-                    
+
                     // We need time too
                     output[ index ].time = result.time;
                 }

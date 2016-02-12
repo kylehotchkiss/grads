@@ -15,6 +15,7 @@ var models = { noaa: require('./data/noaa-models.json') };
 var post = require('./library/post.js');
 var request = require('./library/request.js');
 var utilities = require('./library/utilities.js');
+var conversions = require('./library/conversions.js');
 
 if ( true ) {
     redis = Redis.createClient();
@@ -26,7 +27,6 @@ var Grads = function( lat, lon, alt, model ) {
         // throw new Error( model + ' is not a valid weather model.');
         model = 'gfs';
     }
-
 
     // Load functions
     this.remap = utilities.remap;
@@ -71,7 +71,7 @@ var Grads = function( lat, lon, alt, model ) {
             this.reducer = Math.ceil(diffLat / this.resolution);
         }
 
-        if ( isNaN( lat[0] ) || isNaN( lat[1] ) ) {
+        if ( isNaN( lat[0] ) || isNaN( lat[1] ) ) {            
             throw new Error('Invalid Latitude value was set');
         }
 
@@ -116,17 +116,30 @@ var Grads = function( lat, lon, alt, model ) {
     }
 
     if ( typeof alt === 'string' && alt.indexOf(':') !== -1 ) {
-        //alt = alt.split(':');
+        alt = alt.split(':');
+        alt[0] = parseFloat(alt[0]);
+        alt[1] = parseFloat(alt[1]);
+        /*var diffAlt = (alt[1] - alt[0]) / this.model.options.resolution;
 
-        //if ( parseFloat(alt[0]) > parseFloat(alt[1]) ) {
-        //    throw new Error('Smaller Altitude must occur first in range');
-        //}
+        if ( diffAlt > this.resolution ) {
+            var reducer = Math.ceil( diffAlt / this.resolution );
 
-        //if ( lon[0] > lon[1] ) {
-        //    throw new Error('Smaller Longitude must occur first in range');
-        //}
+            if ( reducer > this.reducer ) {
+                this.reducer = reducer;
+            }
+        }*/
 
-        throw new Error('Altitude sets are not currently supported due to Grads complexities');
+        if ( isNaN( lon[0] ) || isNaN( lon[1] ) ) {
+            throw new Error('Invalid Longitude value was set');
+        }
+
+        if ( alt[0] > alt[1] ) {
+            var intermediate = alt[0];
+            alt[0] = alt[1];
+            alt[1] = intermediate;
+
+            //throw new Error('Smaller Longitude must occur first in range');
+        }
     } else {
         alt = [ alt ];
     }
@@ -165,7 +178,17 @@ var Grads = function( lat, lon, alt, model ) {
         this.lon.push( this.remap( lon[k], [ this.model.range.lonMin, this.model.range.lonMax ], [ 0, this.model.steps.lon ], true ) );
     }
 
-    this.alt = alt;
+    // Convert lat from Meters to Millibars (pressure altitude)
+    for ( var l in alt ) {
+        if ( alt[l] < this.model.range.altMin || alt[l] > this.model.range.altMax ) {
+            throw new Error('Altitude is out of model bounds');
+        }
+
+        alt[l] = conversions.pressure( alt[l] );
+
+        // inaccurate - should be minimum 363.6
+        this.alt.push( this.remap( alt[l], [ 110.8, 84998.2 ], [ 0, this.model.steps.alt ], true ) );
+    }
 };
 
 module.exports = Grads;

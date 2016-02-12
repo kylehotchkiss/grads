@@ -145,3 +145,44 @@ exports.increment = function( hours ) {
         throw new Error('GrADS overflow error');
     }
 };
+
+
+
+//
+// Incorrect altitude selection code
+//
+/*
+if ( includeAlt ) {
+    if ( this.model.options.fidelity === 'low' ) { // GFS
+        if ( this.alt[0] < 1829 ) {
+            altitude = '_1829m';
+        } else if ( this.alt[0] >= 1829 && this.alt[0] < 2743 ) {
+            altitude = '_2743m';
+        } else if ( this.alt[0] >= 2743 && this.alt[0] < 3658 ) {
+            altitude = '_3658m';
+        } if ( this.alt[0] >= 3658 && this.alt[0] < 25908 ) {
+            level = this.remap( this.alt[0], [ 3658, 25908 ], [ 0, this.model.steps.alt ], true );
+            altitude = 'prs';
+        } else if ( this.alt[0] >= 25908 && this.alt[0] < 44307 ) {
+            altitude = '30_0mb';
+        }
+    } else { // RAP and GFSHD
+        if ( this.alt[0] < 12000 ) {
+            level = this.remap( this.alt[0], [ 0, 12000 ], [ 0, this.model.steps.alt ], true );
+            altitude = 'prs';
+        } else if ( this.alt[0] >= 12000 && this.alt[0] < 14000 ) {
+            altitude = '180_150mb';
+        } else if ( this.alt[0] >= 14000 && this.alt[0] < 15000 ) {
+            altitude = '150_120mb';
+        } else if ( this.alt[0] >= 15000 && this.alt[0] < 17000 ) {
+            altitude = '120_90mb';
+        } else if ( this.alt[0] >= 17000 && this.alt[0] < 19000 ) {
+            altitude = '90_60mb';
+        } else if ( this.alt[0] >= 19000 && this.alt[0] < 24000 ) {
+            altitude = '60_30mb';
+        } else if ( this.alt[0] >= 24000 ) {
+            altitude = '30_0mb';
+        }
+    }
+} 
+*/

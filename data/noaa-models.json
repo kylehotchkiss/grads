@@ -7,12 +7,14 @@
             "latMin": -90,
             "latMax": 90,
             "lonMin": 0,
-            "lonMax": 360
+            "lonMax": 360,
+            "altMin": 110.8,
+            "altMax": 84998.2
         },
         "steps": {
             "lat": 721,
             "lon": 1440,
-            "alt": 26,
+            "alt": 25,
             "days": 10.125,
             "time": 81
         },
