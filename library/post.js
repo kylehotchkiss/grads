@@ -17,7 +17,7 @@ exports.parse = function( url, variable, content, callback, timetravel ) {
         if ( lines[11].indexOf('Invalid Parameter Exception') ) {
             if ( lines[11].indexOf('is not an available dataset') ) {
                 timetravel();
-                this.cache( url, false );
+                this.cache( 'request', url, false );
             } else {
                 console.error( lines[11] );
                 throw new Error( 'GrADS parameter error' );
@@ -130,6 +130,9 @@ exports.parse = function( url, variable, content, callback, timetravel ) {
             }
         }
 
+        // Save keys for later
+        this.keys = variables;
+
         //
         // Apply variables to values so we can associate data with reality
         // This is so stupid complicated and harded coded but my mind is
@@ -186,8 +189,9 @@ exports.parse = function( url, variable, content, callback, timetravel ) {
             }
         }
 
-        // Save processed result into redis
-        this.cache( url, values );
+        // Save processed result and variables into redis
+        this.cache( 'request', url, values );
+        this.cache( 'config', url, this.config() );
 
         // console.log( 'Requests:' + this.counter );
         callback( values, this.config() );
@@ -227,14 +231,18 @@ exports.flatten = function() {
                         index = `[${ +moment( result.time ) }][${ result.alt }][${ result.lat }][${ result.lon }]`;
 
                         output[ index ] = result.values;
+                        output[ index ].lat = result.lat;
+                        output[ index ].lon = result.lon;
                         output[ index ].alt = result.alt;
-                        output[ index ].time = result.time;                        
+                        output[ index ].time = result.time;
                     }
                 } else {
                     result = this.results[i][j][k];
                     index = `[${ +moment( result.time ) }][${ result.lat }][${ result.lon }]`;
 
                     output[ index ] = result.values;
+                    output[ index ].lat = result.lat;
+                    output[ index ].lon = result.lon;
                     output[ index ].time = result.time;
                 }
             }

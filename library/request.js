@@ -84,7 +84,7 @@ exports.fetch = function( variable, includeAlt, parentCallback ) {
 
     // Debug:
     //console.log( this.incrementCounter );
-    //console.log( url );
+    console.log( url );
 
     var online = () => {
         request( url, function( error, response, body ) {
@@ -100,20 +100,22 @@ exports.fetch = function( variable, includeAlt, parentCallback ) {
         });
     };
 
-    var cached = values => {
-        callback( values, this.config() );
+    var cached = ( values, config ) => {
+        // TODO: merge former config with new one
+        callback( values, config );
     };
 
     if ( redis ) {
-        redis.get('request:' + url, function( error, values ) {
-            // TODO: Why does redis cast false differently sometimes?
-
+        redis.get('grads-request:' + url, function( error, values ) {
             if ( values === false || values === 'false' ) {
                 // Time Travel
                 self.increment();
                 self.fetch( variable, includeAlt, callback );
             } else if ( values ) {
-                cached( JSON.parse( values ) );
+                // Assumes config is always successfully loaded
+                redis.get('grads-config:' + url, function( error, config ) {
+                    cached( JSON.parse( values ), config );
+                });
             } else {
                 online();
             }
@@ -158,8 +160,8 @@ exports.bulkFetch = function( variables, callback ) {
             var name = this.model.name + ' ↦ ' + this.dictionary[ variable ];
             gauge.show( name , ( i / total ) );
 
-            this.fetch( variable, false, values => {
-                i++; callback( false, values );
+            this.fetch( variable, false, ( values, config ) => {
+                i++; callback( false, { values: values, config: config });
             });
         } else {
             console.error( variable + ' is not available in ' + this.model.name );
@@ -169,16 +171,18 @@ exports.bulkFetch = function( variables, callback ) {
     }, ( error, results ) => {
         if ( !error ) {
             var ensemble = [];
+            var config = {};
 
             for ( var i in results ) {
-                _.merge(ensemble, results[i]);
+                _.merge(ensemble, results[i].values);
+                _.merge(config, results[i].config);
             }
 
             gauge.hide();
 
             this.results = ensemble;
 
-            callback( ensemble, this.config() );
+            callback( ensemble, config );
         }
     });
 };

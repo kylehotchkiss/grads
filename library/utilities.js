@@ -75,10 +75,10 @@ exports.matches = function( string, regex, index ) {
 //
 // Store value in Redis cache, if Redis exists. Set expiration.
 //
-exports.cache = function( url, values ) {
+exports.cache = function( prefix, url, values ) {
     if ( redis ) {
-        redis.set( 'request:' + url, JSON.stringify(values) );
-        redis.expire( 'request:' + url , 1800 );
+        redis.set( 'grads-' + prefix + ':' + url, JSON.stringify(values) );
+        redis.expire( 'grads-' + prefix + ':' + url , 1800 );
     }
 };
 
@@ -94,6 +94,7 @@ exports.config = function() {
     var resolution_y = this.reducer ? this.model.options.resolution_y * this.reducer : this.model.options.resolution_y;
 
     return {
+        keys: this.keys, // keys for doing nearest-neighbor lookups
         offset: this.offset, // backwards iterations to reach dataset (eg 1)
         resolution: resolution,
         resolution_x: resolution_x,
@@ -184,5 +185,5 @@ if ( includeAlt ) {
             altitude = '30_0mb';
         }
     }
-} 
+}
 */

@@ -15,21 +15,10 @@
 
         "%comment%": "Altitude-based names",
         "wind_u_prs": "ugrdprs",
-        "wind_u_1829m": "ugrd_1829m",
-        "wind_u_2743m": "ugrd_2743m",
-        "wind_u_3658m": "ugrd_3658m",
-        "wind_u_30_0mb": "ugrd30_0mb",
-        "wind_v_prs": "vgrdprs",
-        "wind_v_1829m": "vgrd_1829m",
-        "wind_v_2743m": "vgrd_2743m",
-        "wind_v_3658m": "vgrd_3658m",
-        "wind_v_30_0mb": "vgrd30_0mb",
-
-        "%comment%": "Sets",
-        "wind_u_set": [ "wind_u_prs", "wind_u_1829m", "wind_u_2743m", "wind_u_3658m", "wind_u_30_0mb" ],
-        "wind_v_set": [ "wind_v_prs", "wind_v_1829m", "wind_v_2743m", "wind_v_3658m", "wind_v_30_0mb" ]
+        "wind_v_prs": "vgrdprs"
     },
     "rap": {
+        "%comment%": "Common Names",
         "humidity": "rh2m",
         "gusts": "gustsfc",
         "clouds": "tcdcclm",
@@ -37,6 +26,10 @@
         "pressure": "pressfc",
         "temperature": "tmpsfc",
         "snow_depth": "snodsfc",
-        "precipitation_rate": "pratesfc"
+        "precipitation_rate": "pratesfc",
+
+        "%comment%": "Altitude-based names",
+        "wind_u_prs": "ugrdprs",
+        "wind_v_prs": "vgrdprs"
     }
 }
