@@ -84,7 +84,7 @@ exports.fetch = function( variable, includeAlt, parentCallback ) {
 
     // Debug:
     //console.log( this.incrementCounter );
-    console.log( url );
+    //console.log( url );
 
     var online = () => {
         request( url, function( error, response, body ) {
@@ -114,7 +114,7 @@ exports.fetch = function( variable, includeAlt, parentCallback ) {
             } else if ( values ) {
                 // Assumes config is always successfully loaded
                 redis.get('grads-config:' + url, function( error, config ) {
-                    cached( JSON.parse( values ), config );
+                    cached( JSON.parse( values ), JSON.parse( config ) );
                 });
             } else {
                 online();

@@ -104,7 +104,7 @@ exports.parse = function( url, variable, content, callback, timetravel ) {
                             .add( days, 'days' )
                             .add( seconds, 'seconds' );
 
-                        refvalues[l] = time.toJSON();
+                        refvalues[l] = +time;
 
                         // Debug:
                         // console.log( moment( refvalues[l] ).format() );
@@ -231,9 +231,6 @@ exports.flatten = function() {
                         index = `[${ +moment( result.time ) }][${ result.alt }][${ result.lat }][${ result.lon }]`;
 
                         output[ index ] = result.values;
-                        output[ index ].lat = result.lat;
-                        output[ index ].lon = result.lon;
-                        output[ index ].alt = result.alt;
                         output[ index ].time = result.time;
                     }
                 } else {
@@ -241,8 +238,6 @@ exports.flatten = function() {
                     index = `[${ +moment( result.time ) }][${ result.lat }][${ result.lon }]`;
 
                     output[ index ] = result.values;
-                    output[ index ].lat = result.lat;
-                    output[ index ].lon = result.lon;
                     output[ index ].time = result.time;
                 }
             }
