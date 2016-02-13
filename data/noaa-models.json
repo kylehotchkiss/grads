@@ -8,8 +8,8 @@
             "latMax": 90,
             "lonMin": 0,
             "lonMax": 360,
-            "altMin": 110.8,
-            "altMax": 84998.2
+            "altMin": 0,
+            "altMax": 1000
         },
         "steps": {
             "lat": 721,

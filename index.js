@@ -71,7 +71,7 @@ var Grads = function( lat, lon, alt, model ) {
             this.reducer = Math.ceil(diffLat / this.resolution);
         }
 
-        if ( isNaN( lat[0] ) || isNaN( lat[1] ) ) {            
+        if ( isNaN( lat[0] ) || isNaN( lat[1] ) ) {
             throw new Error('Invalid Latitude value was set');
         }
 
@@ -179,15 +179,24 @@ var Grads = function( lat, lon, alt, model ) {
     }
 
     // Convert lat from Meters to Millibars (pressure altitude)
+    // Validation is a little weird. It gets done after variable conversion to pressure.
     for ( var l in alt ) {
+        alt[l] = conversions.pressure( alt[l] );
+
+        if ( alt[l] < this.model.range.altMin ) {
+            console.info('Alt override to 10mb');
+            alt[l] = 10;
+        } else if ( alt[l] > this.model.range.altMax ) {
+            console.info('Alt override to 1000mb');
+            alt[l] = 1000;
+        }
+
         if ( alt[l] < this.model.range.altMin || alt[l] > this.model.range.altMax ) {
             throw new Error('Altitude is out of model bounds');
         }
 
-        alt[l] = conversions.pressure( alt[l] );
-
-        // inaccurate - should be minimum 363.6
-        this.alt.push( this.remap( alt[l], [ 110.8, 84998.2 ], [ 0, this.model.steps.alt ], true ) );
+        // Inverse the result because altitude works differently
+        this.alt.push( this.model.steps.alt - this.remap( alt[l], [ this.model.range.altMin, this.model.range.altMax ], [ 0, this.model.steps.alt ], true ) );
     }
 };
 

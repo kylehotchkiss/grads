@@ -216,26 +216,25 @@ exports.flatten = function() {
     // ░░░░░░░░░░▀▀▄▄░▒▒▒▒▒▒▒▒▒▒░░░░█░
     // ░░░░░░░░░░░░░░▀▄▄▄▄▄░░░░░░░░█░░
     //
-
-    //console.log( JSON.stringify( this.results, null, 4 ) );
-
     for ( var i in this.results ) {
         for ( var j in this.results[i] ) {
             for ( var k in this.results[i][j] ) {
+                var result;
+
                 if ( typeof this.results[i][j][k].values === 'undefined' && Object.keys( this.results[i][j][k] ).length ) {
                     for ( var l in this.results[i][j][k] ) {
-                        var result = this.results[i][j][k][l];
+                        result = this.results[i][j][k][l];
                         index = `[${ +moment( result.time ) }][${ result.alt }][${ result.lat }][${ result.lon }]`;
 
-                        output[ index ] = this.results[i][j][k][l];
+                        output[ index ] = result.values;
+                        output[ index ].alt = result.alt;
+                        output[ index ].time = result.time;                        
                     }
                 } else {
-                    var result = this.results[i][j][k];
+                    result = this.results[i][j][k];
                     index = `[${ +moment( result.time ) }][${ result.lat }][${ result.lon }]`;
 
                     output[ index ] = result.values;
-
-                    // We need time too
                     output[ index ].time = result.time;
                 }
             }
