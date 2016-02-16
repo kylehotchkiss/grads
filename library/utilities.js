@@ -4,9 +4,12 @@ var redis;
 var Redis = require('redis');
 var moment = require('moment');
 
-if ( true ) {
-    redis = Redis.createClient();
+if ( process.env.REDIS_URL ) {
+    redis = Redis.createClient({
+        url: process.env.REDIS_URL
+    });
 }
+
 
 //
 // Remap coordinate values into more grads friendly ranges.
@@ -76,7 +79,7 @@ exports.matches = function( string, regex, index ) {
 // Store value in Redis cache, if Redis exists. Set expiration.
 //
 exports.cache = function( prefix, url, values ) {
-    if ( redis ) {
+    if ( process.env.REDIS_URL ) {
         redis.set( 'grads-' + prefix + ':' + url, JSON.stringify(values) );
         redis.expire( 'grads-' + prefix + ':' + url , 1800 );
     }

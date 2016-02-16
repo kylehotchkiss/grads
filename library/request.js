@@ -8,8 +8,10 @@ var async = require('async');
 var moment = require('moment');
 var request = require('request');
 
-if ( true ) {
-    redis = Redis.createClient();
+if ( process.env.REDIS_URL ) {
+    redis = Redis.createClient({
+        url: process.env.REDIS_URL
+    });
 }
 
 _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
@@ -49,7 +51,7 @@ exports.build = function( variable, includeAlt ) {
 
     // Generate parameters portion of the URL, adding level if set
     //if ( typeof level === 'number' ) {
-    if ( variable.indexOf('prs') ) { // PRS tends to indicate levels of altitude
+    if ( variable.indexOf('prs') !== -1 ) { // PRS tends to indicate levels of altitude
         subset = this.parameters( offset + ':' + ( offset + 3 ), this.alt, this.lat, this.lon );
     } else {
         //subset = parameters( offset, this.lat, this.lon );
@@ -84,7 +86,7 @@ exports.fetch = function( variable, includeAlt, parentCallback ) {
 
     // Debug:
     //console.log( this.incrementCounter );
-    //console.log( url );
+    // console.log( url );
 
     var online = () => {
         request( url, function( error, response, body ) {

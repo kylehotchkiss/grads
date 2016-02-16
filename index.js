@@ -17,8 +17,10 @@ var request = require('./library/request.js');
 var utilities = require('./library/utilities.js');
 var conversions = require('./library/conversions.js');
 
-if ( true ) {
-    redis = Redis.createClient();
+if ( process.env.REDIS_URL ) {
+    redis = Redis.createClient({
+        url: process.env.REDIS_URL
+    });
 }
 
 var Grads = function( lat, lon, alt, model ) {
