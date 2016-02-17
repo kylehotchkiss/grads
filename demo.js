@@ -14,35 +14,6 @@ var Conditions = require('./library/abstractions/_conditions.js');
 
 app.use( express.static('public') );
 
-app.get('/conditions/:lat/:lon/:alt/:model?', function ( req, res ) {
-    try {
-        var target = new Conditions( req.params.lat, req.params.lon, ( req.params.alt || 0 ), ( req.params.model || 'gfs' ) );
-
-        target.temp(function( temp ) {
-            target.wind(function( speed, heading ) {
-                res.json({
-                    conditions: {
-                        temp: temp,
-                        windSpeed: speed,
-                        windHeading: heading
-                    },
-                    meta: {
-                        requested: {
-                            lat: req.params.lat,
-                            lon: req.params.lon,
-                            alt: req.params.alt
-                        },
-                        actual: {},
-                        grads: {},
-                    }
-                });
-            });
-        });
-    } catch ( error ) {
-        res.json({ status: 'error', message: error.message });
-    }
-});
-
 app.get('/sea/:lat/:lon', function ( req, res ) {
     var target = new Sea( req.params.lat, req.params.lon );
 
