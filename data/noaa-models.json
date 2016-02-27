@@ -7,19 +7,23 @@
             "latMin": -90,
             "latMax": 90,
             "lonMin": 0,
-            "lonMax": 360
+            "lonMax": 360,
+            "altMin": 0,
+            "altMax": 1000
         },
         "steps": {
             "lat": 721,
             "lon": 1440,
-            "alt": 26,
-            "days": 10,
+            "alt": 25,
+            "days": 10.125,
             "time": 81
         },
         "options": {
             "fidelity": "low",
             "quarterly": true,
-            "degreeseast": true
+            "resolution": 0.25,
+            "degreeseast": true,
+            "modeltmpl": "{{ model.slug }}/{{ model.name }}{{ time.format('YYYYMMDD') }}/{{ model.slug }}_{{ hourset }}z.ascii?"
         }
     },
     "rap": {
@@ -30,19 +34,24 @@
             "latMin": 16.281,
             "latMax": 58.02525454545,
             "lonMin": -139.85660300000,
-            "lonMax": -57.69083517955
+            "lonMax": -57.69083517955,
+            "altMin": 0,
+            "altMax": 1000
         },
         "steps": {
             "lat": 226,
             "lon": 427,
-            "alt": 36,
+            "alt": 38,
             "days": 1,
             "time": 18
         },
         "options": {
             "fidelity": "high",
+            "resolution_x": 0.192,
+            "resolution_y": 0.185,
             "quarterly": false,
-            "degreeseast": false
+            "degreeseast": false,
+            "modeltmpl": "{{ model.slug }}/{{ model.name }}{{ time.format('YYYYMMDD') }}/{{ model.slug }}_{{ hourset }}z.ascii?"
         }
     },
     "hrrr": {
@@ -65,7 +74,9 @@
         "options": {
             "fidelity": "high",
             "quarterly": false,
-            "degreeseast": false
+            "degreeseast": false,
+            "resolution": 0.0025,
+            "modeltmpl": "{{ model.slug }}/{{ model.name }}{{ time.format('YYYYMMDD') }}/{{ model.slug }}_{{ hourset }}z.ascii?"
         }
     },
     "wave": {
@@ -87,7 +98,9 @@
         "options": {
             "fidelity": "low",
             "quarterly": true,
-            "degreeseast": true
+            "resolution": 0.5,
+            "degreeseast": true,
+            "modeltmpl": "{{ model.slug }}/{{ model.name }}/{{ time.format('YYYYMMDD') }}/multi_1.glo_30mext{{ time.format('YYYYMMDD') }}_{{ hourset }}z.ascii?"
         }
     }
 }

@@ -1,0 +1,35 @@
+{
+    "gfs": {
+        "%comment%": "Common Names",
+        "humidity": "rh2m",
+        "gusts": "gustsfc",
+        "clouds": "tcdcclm",
+        "wind_u": "ugrd2pv",
+        "wind_v": "vgrd2pv",
+        "dewpoint": "dpt2m",
+        "pressure": "pressfc",
+        "temperature": "tmpsfc",
+        "snow_depth": "snodsfc",
+        "precipitation_rate": "pratesfc",
+        "precipitation_frozen": "cpofpsfc",
+
+        "%comment%": "Altitude-based names",
+        "wind_u_prs": "ugrdprs",
+        "wind_v_prs": "vgrdprs"
+    },
+    "rap": {
+        "%comment%": "Common Names",
+        "humidity": "rh2m",
+        "gusts": "gustsfc",
+        "clouds": "tcdcclm",
+        "dewpoint": "dpt2m",
+        "pressure": "pressfc",
+        "temperature": "tmpsfc",
+        "snow_depth": "snodsfc",
+        "precipitation_rate": "pratesfc",
+
+        "%comment%": "Altitude-based names",
+        "wind_u_prs": "ugrdprs",
+        "wind_v_prs": "vgrdprs"
+    }
+}
