@@ -14,43 +14,6 @@ Applications & Implementation ideas:
 
 GrADS is a beast of a server to access. I've worked on this code for several years now and finally am comfortable that I'm doing it right. 
 
-# Usage
-Right now, the API only works for simple requests (single location). Access it like so -
-
-    https://grads.herokuapp.com/conditions?lat=x&lon=x&alt=x&model=[rap|gfshd|gfs]
-
-The first three parameters are fairly straightforward. Altitude needs to be provided in Meters. The `model` option is optional, as the best model for your location will be chosen if you leave it blank.
-
-You will get back the following data:
-
-```
-    {
-        conditions: {
-            wind: {
-                velocity: ,
-                heading:
-            }
-        },
-        location: {
-            lat: ,
-            lon: ,
-            alt:
-        }
-        meta: {
-            request: {
-                wind: {
-                    u_component
-                    v_component
-                    pressure_altitude:
-                }
-            },
-            timestamp: ,
-            version: ,
-        }
-    }
-```
-
-
 # TODO
 This is based off some code I wrote years ago so it's pretty simple for now. Eventually, it'd be nice to have the following features:
 
