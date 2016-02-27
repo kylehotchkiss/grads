@@ -1,13 +1,12 @@
 {
   "name": "grads",
-  "version": "0.3.0",
-  "description": "Simple API to NOAA Grads for gathering live-ish wind data for nearly every point on the surface of Earth. Data is all predicitions based on temperture differential, would not advice use for high-precision calculations.",
+  "version": "0.3.1",
+  "description": "Javascript-based GrADS (Grid Analysis and Display System) Data Server client. Primarily an API for accessing weather forecast/climate data for a location or area. Currently, acccesses a few GFS variables but working to include the majority of human-usable variables (do you care about surface flux or gravity wave stuff? I don't!)",
   "main": "index.js",
   "engines": {
     "node": "4.2.1"
   },
   "scripts": {
-    "start": "/usr/local/opt/iojs/bin/iojs --use_strict --harmony_classes index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

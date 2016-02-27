@@ -5,7 +5,7 @@
 'use strict';
 
 var async = require('async');
-var Grads = require('../../index.js');
+var Grads = require('../../grads.js');
 var conversions = require('../conversions.js');
 
 class Sea extends Grads {
