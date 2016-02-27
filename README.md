@@ -12,13 +12,26 @@ Applications & Implementation ideas:
 * Visualize weather conditions for an entire country at once. Quite interesting seeing this on poorer countries.
 * Potientally create a forecast broadcast system for small countries with a small decoding device.
 
-GrADS is a beast of a server to access. I've worked on this code for several years now and finally am comfortable that I'm doing it right. 
+GrADS is a beast of a server to access. I've worked on this code for several years now and finally am comfortable that I'm doing it right.
+
+## Usage
+
+Coming soon!
+
+Basically:
+
+    var grads = new Grads( lat, lon, alt(m) );
+
+    grads.fetch('temperature', function( values, config ) {
+        var tempInKelvin = values[0][0][0];
+    });
 
 # TODO
 This is based off some code I wrote years ago so it's pretty simple for now. Eventually, it'd be nice to have the following features:
 
-* Rate Limiting
-* Wind predictions
+* Working/selectable time ranges
+* Auto-selection of most "valuable" model
+
 
 # In the Future
 Some cool data for the intended use case (physics simulation) would be to implement the following available datasets (from http://ruc.noaa.gov/rr/RAP_var_diagnosis.html) -
