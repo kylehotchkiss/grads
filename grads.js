@@ -196,10 +196,10 @@ var Grads = function( lat, lon, alt, model ) {
         alt[l] = conversions.pressure( alt[l] );
 
         if ( alt[l] < this.model.range.altMin ) {
-            console.info('Alt override to 10mb');
+            //console.info('Alt override to 10mb');
             alt[l] = 10;
         } else if ( alt[l] > this.model.range.altMax ) {
-            console.info('Alt override to 1000mb');
+            //console.info('Alt override to 1000mb');
             alt[l] = 1000;
         }
 

@@ -1,0 +1,6 @@
+--require should
+--reporter spec
+--ui tdd
+--slow 10000
+--timeout 120000
+--bail
