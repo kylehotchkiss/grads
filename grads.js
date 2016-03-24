@@ -61,12 +61,18 @@ var Grads = function( lat, lon, alt, model ) {
     this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
 
     // Read in ranges for Latitude, Longitude, and Altitude
-    // Verify ranges are small:large
-    // TODO: Can make this more robust in future by flipping them for user
-    if ( typeof lat === 'string' && lat.indexOf(':') !== -1 ) {
-        lat = lat.split(':');
-        lat[0] = parseFloat(lat[0]);
-        lat[1] = parseFloat(lat[1]);
+    if ( typeof lat === 'number' ) {
+        // Singular number passed
+        lat = [ lat ];
+    } else {
+        if ( typeof lat === 'string' && lat.indexOf(':') !== -1 ) {
+            // first:last string passed
+            lat = lat.split(':');
+            lat[0] = parseFloat(lat[0]);
+            lat[1] = parseFloat(lat[1]);
+        }
+
+        // Array passed (or string was converted to array)
         var diffLat = ( lat[1] - lat[0] ) / this.model.options.resolution;
 
         if ( diffLat > this.resolution ) {
@@ -81,17 +87,21 @@ var Grads = function( lat, lon, alt, model ) {
             var intermediate = lat[0];
             lat[0] = lat[1];
             lat[1] = intermediate;
-
-            //throw new Error('Smaller Latitude must occur first in range');
         }
-    } else {
-        lat = [ lat ];
     }
 
-    if ( typeof lon === 'string' && lon.indexOf(':') !== -1 ) {
-        lon = lon.split(':');
-        lon[0] = parseFloat(lon[0]);
-        lon[1] = parseFloat(lon[1]);
+    if ( typeof lon === 'number' ) {
+        // Singular number passed
+        lon = [ lon ];
+    } else {
+        if ( typeof lon === 'string' && lon.indexOf(':') !== -1 ) {
+            // first:last string passed
+            lon = lon.split(':');
+            lon[0] = parseFloat(lon[0]);
+            lon[1] = parseFloat(lon[1]);
+        }
+
+        // Array passed (or string was converted to array)
         var diffLon = (lon[1] - lon[0]) / this.model.options.resolution;
 
         if ( diffLon > this.resolution ) {
@@ -110,17 +120,21 @@ var Grads = function( lat, lon, alt, model ) {
             var intermediate = lon[0];
             lon[0] = lon[1];
             lon[1] = intermediate;
-
-            //throw new Error('Smaller Longitude must occur first in range');
         }
-    } else {
-        lon = [ lon ];
     }
 
-    if ( typeof alt === 'string' && alt.indexOf(':') !== -1 ) {
-        alt = alt.split(':');
-        alt[0] = parseFloat(alt[0]);
-        alt[1] = parseFloat(alt[1]);
+    if ( typeof alt === 'number' ) {
+        // Singular number passed
+        alt = [ alt ];
+    } else {
+        // first:last string passed
+        if ( typeof alt === 'string' && alt.indexOf(':') !== -1 ) {
+            alt = alt.split(':');
+            alt[0] = parseFloat(alt[0]);
+            alt[1] = parseFloat(alt[1]);
+        }
+
+        // Array passed (or string was converted to array)
         /*var diffAlt = (alt[1] - alt[0]) / this.model.options.resolution;
 
         if ( diffAlt > this.resolution ) {
@@ -131,19 +145,15 @@ var Grads = function( lat, lon, alt, model ) {
             }
         }*/
 
-        if ( isNaN( lon[0] ) || isNaN( lon[1] ) ) {
-            throw new Error('Invalid Longitude value was set');
+        if ( isNaN( alt[0] ) || isNaN( alt[1] ) ) {
+            throw new Error('Invalid Altitude value was set');
         }
 
         if ( alt[0] > alt[1] ) {
             var intermediate = alt[0];
             alt[0] = alt[1];
             alt[1] = intermediate;
-
-            //throw new Error('Smaller Longitude must occur first in range');
         }
-    } else {
-        alt = [ alt ];
     }
 
     // If we're using a degreeseast model, convert the longitude to 0-360deg
