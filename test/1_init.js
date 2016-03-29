@@ -35,12 +35,34 @@ describe('Creating grads objects / input validation', function() {
             error.should.be.truthy;
         }
     });
+
+    it('properly validates latitude ranges when crossing a range [rap]', function() {
+        try {
+            var instance = new Grads( variables.latitudeEdge, variables.locations[1].lon, variables.locations[1].alt, 'rap' );
+            var instance2 = new Grads( [ variables.latitudeEdge - 1, variables.latitudeEdge + 1 ], variables.locations[1].lon, variables.locations[1].alt, 'rap' );
+        } catch( error ) {
+            error.should.be.truthy;
+        }
+    });
+
+    it('properly validates longitude ranges when crossing a range [rap]', function() {
+        try {
+            var instance = new Grads( variables.locations[1].lat, variables.longitudeEdge, variables.locations[1].alt, 'rap' );
+            var instance2 = new Grads( variables.locations[1].lat, [ variables.longitudeEdge - 1, variables.longitudeEdge + 1 ], variables.locations[1].alt, 'rap' );
+        } catch( error ) {
+            error.should.be.truthy;
+        }
+    });
+
+    it('flips large:small latitude range input [gfs]', function() {
+        var instance = new Grads( variables.locations[3].lat, variables.locations[2].lon, variables.locations[1].alt, 'gfs' );
+    });
+
+    it('flips large:small longitude range input [gfs]', function() {
+        var instance = new Grads( variables.locations[2].lat, variables.locations[3].lon, variables.locations[1].alt, 'gfs' );
+    });
 });
 
 // fails when init GFS too late
 // fails when init GFS too soon
-// properly validates latitude ranges when crossing a range [rap]
-// properly validates longitude ranges when crossing a range [rap]
 // properly validates times when crossing a range [rap]
-// flips large:small latitude range input [rap]
-// flips large:small longitude range input [rap]
