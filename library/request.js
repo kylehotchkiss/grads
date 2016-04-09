@@ -24,6 +24,7 @@ exports.build = function( variable, includeAlt ) {
     var level, model, subset, offset, hourset, altitude;
 
     // Figure out which dataset to grab, based on time
+    // TODO: Why did I use midnight? It works, but why?
     if ( this.model.options.quarterly ) {
         hourset = Math.round( this.remap( this.start.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 4 ], true ) * 6 );
     } else {
@@ -35,10 +36,11 @@ exports.build = function( variable, includeAlt ) {
 
     // (Re)validate the incoming dates.
     // Since we could time travel back a report or two
-    var end = moment().add( models.noaa[model].steps.time * models.noaa[model].steps.interval, 'ms' );
+    var difference = moment().diff( this.start, 'hours' );
+    var end = moment().add( this.model.steps.time * this.model.steps.interval, 'ms' ).subtract( difference, 'hours' );
 
     for ( var i in this.time ) {
-        if ( time[i] < this.start || time[i] > end ) {
+        if ( this.time[i] < this.start || this.time[i] > end ) {
             throw new Error('Time is out of loaded model bounds (since the latest dataset you requested was unavailable, we time-travlled back to the previous report which exceeded the range of the report)');
         }
     }
@@ -58,9 +60,6 @@ exports.build = function( variable, includeAlt ) {
         hourset: hourset,
         model: this.model
     });
-
-    console.log('Start Time:')
-    console.log( this.start.toISOString() );
 
     // Generate parameters portion of the URL, adding level if set
     //if ( typeof level === 'number' ) {
