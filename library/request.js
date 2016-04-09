@@ -33,10 +33,15 @@ exports.build = function( variable, includeAlt ) {
     // In theory, this fixes our crazy offset issues.
     this.start.set('hour', hourset);
 
-
     // (Re)validate the incoming dates.
     // Since we could time travel back a report or two
-    // TODO: set basetime based on report we select so we can figure out
+    var end = moment().add( models.noaa[model].steps.time * models.noaa[model].steps.interval, 'ms' );
+
+    for ( var i in this.time ) {
+        if ( time[i] < this.start || time[i] > end ) {
+            throw new Error('Time is out of loaded model bounds (since the latest dataset you requested was unavailable, we time-travlled back to the previous report which exceeded the range of the report)');
+        }
+    }
 
     if ( hourset < 10 ) {
         hourset = '0' + hourset;
