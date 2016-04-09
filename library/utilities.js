@@ -142,7 +142,7 @@ exports.parameters = function() {
 exports.increment = function( hours ) {
     this.incrementCounter++;
     this.offset = this.offset + ( hours || 1 );
-    this.time = moment().utc().subtract(this.offset, 'hours');
+    this.start = moment().utc().subtract(this.offset, 'hours').startOf('hour');
     this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
 
     if ( this.incrementCounter > 25 ) {

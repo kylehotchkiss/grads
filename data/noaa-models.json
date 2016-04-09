@@ -15,8 +15,9 @@
             "lat": 721,
             "lon": 1440,
             "alt": 25,
+            "time": 81,
             "days": 10.125,
-            "time": 81
+            "interval": 10800000
         },
         "options": {
             "fidelity": "low",
@@ -43,7 +44,8 @@
             "lon": 427,
             "alt": 38,
             "days": 1,
-            "time": 18
+            "time": 18,
+            "interval": 3600000
         },
         "options": {
             "fidelity": "high",

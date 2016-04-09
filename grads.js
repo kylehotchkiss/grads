@@ -23,7 +23,7 @@ if ( process.env.REDIS_URL ) {
     });
 }
 
-var Grads = function( lat, lon, alt, model ) {
+var Grads = function( lat, lon, alt, time, model ) {
     // Verify that model exists
     if ( typeof models.noaa[model] === 'undefined' ) {
         // throw new Error( model + ' is not a valid weather model.');
@@ -44,11 +44,17 @@ var Grads = function( lat, lon, alt, model ) {
     this.parse = post.parse;
     this.flatten = post.flatten;
 
+    // Time Boundaries - We pretend to know how to validate this but in reality,
+    // and due to unknown time-travelling, it's difficlt to validate this with
+    // 100% accuracy at the constructor level.
+    var start = moment().subtract(5, 'seconds'); // Forgive tests for being a little late
+    var end = moment().add( models.noaa[model].steps.time * models.noaa[model].steps.interval, 'ms' );
 
     // Load the model configuration
     this.alt = [];
     this.lat = [];
     this.lon = [];
+    this.time = [];
     this.offset = 0;
     this.reducer = 0;
     this.counter = 0;
@@ -57,7 +63,7 @@ var Grads = function( lat, lon, alt, model ) {
     this.incrementCounter = 0; // Class wide iteration offset to prevent garbage requests
     this.model = models.noaa[ model ]; // Load (known) NOAA model configuration
     this.dictionary = Dictionary[ model || 'gfs' ]; // Load a common set of variable names for accessing weather
-    this.time = moment().utc().subtract(this.offset, 'hours');
+    this.start = moment().utc().subtract(this.offset, 'hours').startOf('hour');
     this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
 
     // Read in ranges for Latitude, Longitude, and Altitude
@@ -156,6 +162,26 @@ var Grads = function( lat, lon, alt, model ) {
         }
     }
 
+    if ( typeof time !== 'object' ) {
+        time = [ moment(time) ];
+    } else {
+        if ( typeof time === 'string' && time.indexof(':') !== -1 ) {
+            time = alt.split(':');
+            time[0] = moment(time[0]);
+            time[1] = moment(time[1]);
+        }
+
+        if ( !time[0].isValid() || !time[1].isValid() ) {
+            throw new Error('Invalid Altitude value was set');
+        }
+
+        if ( time[0] > time[1] ) {
+            var intermediate = time[0];
+            time[0] = time[1];
+            time[1] = intermediate;
+        }
+    }
+
     // If we're using a degreeseast model, convert the longitude to 0-360deg
     if ( this.model.options.degreeseast ) {
         for ( var i in lon ) {
@@ -209,6 +235,16 @@ var Grads = function( lat, lon, alt, model ) {
 
         // Inverse the result because altitude works differently
         this.alt.push( this.model.steps.alt - this.remap( alt[l], [ this.model.range.altMin, this.model.range.altMax ], [ 0, this.model.steps.alt ], true ) );
+    }
+
+    for ( var m in time ) {
+        if ( time[m] < start || time[m] > end ) {
+            throw new Error('Time is out of model bounds');
+        }
+
+        // We're going to push whole time, since we need to figure out the offset
+        // when we know which dataset we are inside of
+        this.time.push( time[m] );
     }
 };
 

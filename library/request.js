@@ -25,29 +25,37 @@ exports.build = function( variable, includeAlt ) {
 
     // Figure out which dataset to grab, based on time
     if ( this.model.options.quarterly ) {
-        hourset = Math.round( this.remap( this.time.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 4 ], true ) * 6 );
+        hourset = Math.round( this.remap( this.start.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 4 ], true ) * 6 );
     } else {
-        hourset = Math.round( this.remap( this.time.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 24 ], true ) );
+        hourset = Math.round( this.remap( this.start.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 24 ], true ) );
     }
 
     // In theory, this fixes our crazy offset issues.
-    this.time.set('hour', hourset);
+    this.start.set('hour', hourset);
+
+
+    // (Re)validate the incoming dates.
+    // Since we could time travel back a report or two
+    // TODO: set basetime based on report we select so we can figure out
 
     if ( hourset < 10 ) {
         hourset = '0' + hourset;
     }
 
     // Figure out which date inside of the dataset to grab
-    offset = this.remap( moment().diff(this.time, 'seconds'), [ 0, ( 86400 * this.model.steps.days ) ], [ 0, this.model.steps.time ] );
+    offset = this.remap( moment().diff(this.time[0], 'seconds'), [ 0, ( 86400 * this.model.steps.days ) ], [ 0, this.model.steps.time ] );
 
     // Every model has it's own very random URL format. All are defined in models file.
     var template = _.template( this.model.options.modeltmpl );
 
     model = template({
-        time: this.time,
+        time: this.start,
         hourset: hourset,
         model: this.model
     });
+
+    console.log('Start Time:')
+    console.log( this.start.toISOString() );
 
     // Generate parameters portion of the URL, adding level if set
     //if ( typeof level === 'number' ) {
@@ -85,7 +93,7 @@ exports.fetch = function( variable, includeAlt, parentCallback ) {
     };
 
     // Debug:
-    //console.log( this.incrementCounter );
+    // console.log( this.incrementCounter );
     // console.log( url );
 
     var online = () => {
