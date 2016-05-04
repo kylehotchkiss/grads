@@ -8,7 +8,7 @@ describe('Requesting data from GrADS', function() {
         var instance = new Grads( variables.locations[0].lat, variables.locations[0].lon, variables.locations[0].alt, Date.now(), 'gfs' );
 
         instance.fetch('temperature', false, function( values, config ) {
-            //console.log( values );
+            // console.log( values );
 
             done();
         });
@@ -18,7 +18,20 @@ describe('Requesting data from GrADS', function() {
         var instance = new Grads( variables.locations[0].lat, variables.locations[0].lon, variables.locations[0].alt, Date.now(), 'rap' );
 
         instance.fetch('temperature', false, function( values, config ) {
-            //console.log( values );
+            // console.log( values );
+
+            done();
+        });
+    });
+
+    it('fetches one points for Latitude', function( done ) {
+        var instance = new Grads( variables.locations[0].lat, variables.locations[0].lon, variables.locations[0].alt, Date.now(), 'gfs' );
+
+        instance.fetch('temperature', false, function( values, config ) {
+            console.log( values );
+            console.log( config );
+
+
 
             done();
         });
