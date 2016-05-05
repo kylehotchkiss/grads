@@ -1,0 +1,5 @@
+machine:
+  node:
+    version: 5.5.0
+  override:
+    - npm install --dev
