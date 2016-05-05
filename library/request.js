@@ -104,8 +104,8 @@ exports.fetch = function( variable, includeAlt, parentCallback ) {
     };
 
     // Debug:
-    console.log( this.incrementCounter );
-    console.log( url );
+    // console.log( this.incrementCounter );
+    // console.log( url );
 
     var online = () => {
         request( url, function( error, response, body ) {

@@ -165,13 +165,18 @@ var Grads = function( lat, lon, alt, time, model ) {
     if ( typeof time !== 'object' ) {
         time = [ moment(time) ];
     } else {
+        var momentUsed = false;
+
         if ( typeof time === 'string' && time.indexof(':') !== -1 ) {
             time = alt.split(':');
             time[0] = moment(time[0]);
             time[1] = moment(time[1]);
+
+            momentUsed = true;
         }
 
-        if ( !time[0].isValid() || !time[1].isValid() ) {
+        if ( ( momentUsed && ( !time[0].isValid() || !time[1].isValid() ) ) ||
+            ( !momentUsed && ( !moment(time[0]).isValid() || !moment(time[1]).isValid() ) ) ) {
             throw new Error('Invalid Altitude value was set');
         }
 
