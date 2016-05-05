@@ -16,46 +16,65 @@ if ( process.env.REDIS_URL ) {
 
 _.templateSettings.interpolate = /{{([\s\S]+?)}}/g;
 
-
 //
 // This represents a few but not all the tricks that GrADS would use to build a url
 //
 exports.build = function( variable, includeAlt ) {
     var level, model, subset, offset, hourset, altitude;
 
+    var timeOffset = ( input ) => {
+        return this.remap( moment().diff(input, 'seconds'), [ 0, ( 86400 * this.model.steps.days ) ], [ 0, this.model.steps.time ] );
+    };
+
     // Figure out which dataset to grab, based on time
+    // TODO: Why did I use midnight? It works, but why?
     if ( this.model.options.quarterly ) {
-        hourset = Math.round( this.remap( this.time.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 4 ], true ) * 6 );
+        hourset = Math.round( this.remap( this.start.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 4 ], true ) * 6 );
     } else {
-        hourset = Math.round( this.remap( this.time.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 24 ], true ) );
+        hourset = Math.round( this.remap( this.start.diff( this.midnight, 'hours'), [ 0, 24 ], [ 0, 24 ], true ) );
     }
 
     // In theory, this fixes our crazy offset issues.
-    this.time.set('hour', hourset);
+    this.start.set('hour', hourset);
+
+    // (Re)validate the incoming dates.
+    // Since we could time travel back a report or two
+    var difference = moment().diff( this.start, 'hours' );
+    var end = moment().add( this.model.steps.time * this.model.steps.interval, 'ms' ).subtract( difference, 'hours' );
+
+    for ( var i in this.time ) {
+        if ( this.time[i] < this.start || this.time[i] > end ) {
+            throw new Error('Time is out of loaded model bounds (since the latest dataset you requested was unavailable, we time-travlled back to the previous report which exceeded the range of the report)');
+        }
+    }
 
     if ( hourset < 10 ) {
         hourset = '0' + hourset;
     }
 
-    // Figure out which date inside of the dataset to grab
-    offset = this.remap( moment().diff(this.time, 'seconds'), [ 0, ( 86400 * this.model.steps.days ) ], [ 0, this.model.steps.time ] );
 
     // Every model has it's own very random URL format. All are defined in models file.
     var template = _.template( this.model.options.modeltmpl );
 
     model = template({
-        time: this.time,
+        time: this.start,
         hourset: hourset,
         model: this.model
     });
 
     // Generate parameters portion of the URL, adding level if set
-    //if ( typeof level === 'number' ) {
     if ( variable.indexOf('prs') !== -1 ) { // PRS tends to indicate levels of altitude
-        subset = this.parameters( offset + ':' + ( offset + 3 ), this.alt, this.lat, this.lon );
+        if ( this.time.length > 1 ) {
+            subset = this.parameters( timeOffset(this.time[0]), this.alt, this.lat, this.lon );
+        } else {
+            subset = this.parameters( timeOffset(this.time[0]) + ':' + timeOffset(this.time[1]), this.alt, this.lat, this.lon );
+        }
     } else {
-        //subset = parameters( offset, this.lat, this.lon );
-        subset = this.parameters( offset + ':' + ( offset + 16 ), this.lat, this.lon );
+        if ( this.time.length > 1 ) {
+            subset = this.parameters( timeOffset(this.time[0]), this.lat, this.lon );
+        } else {
+            subset = this.parameters( timeOffset(this.time[0]) + ':' + timeOffset(this.time[1]), this.lat, this.lon );
+        }
     }
 
     // Generate the entire URL, adding altitude if set
@@ -85,7 +104,7 @@ exports.fetch = function( variable, includeAlt, parentCallback ) {
     };
 
     // Debug:
-    //console.log( this.incrementCounter );
+    // console.log( this.incrementCounter );
     // console.log( url );
 
     var online = () => {

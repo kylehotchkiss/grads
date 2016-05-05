@@ -27,6 +27,8 @@
         "temperature": "tmpsfc",
         "snow_depth": "snodsfc",
         "precipitation_rate": "pratesfc",
+        "ceiling_height": "hgtclb",
+        "cloud_height": "hgtclt",
 
         "%comment%": "Altitude-based names",
         "wind_u_prs": "ugrdprs",

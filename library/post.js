@@ -11,7 +11,7 @@ exports.parse = function( url, variable, content, callback, timetravel ) {
     var lines = content.split('\n');
     var counter = /\[(\d*)\]/g;
     var variables = {};
-    var values = {};
+    var values = {};    
 
     if ( lines[0] === '<html>' ) {
         if ( lines[11].indexOf('Invalid Parameter Exception') ) {
