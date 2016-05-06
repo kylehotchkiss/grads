@@ -67,7 +67,7 @@ var Grads = function( lat, lon, alt, time, model ) {
     this.midnight = moment().utc().subtract(this.offset, 'hours').startOf('day');
 
     // Read in ranges for Latitude, Longitude, and Altitude
-    if ( typeof lat === 'number' ) {
+    if ( typeof lat === 'number' || ( typeof lat === 'string' && lat.indexOf(':') === -1 ) ) {
         // Singular number passed
         lat = [ lat ];
     } else {
@@ -96,7 +96,7 @@ var Grads = function( lat, lon, alt, time, model ) {
         }
     }
 
-    if ( typeof lon === 'number' ) {
+    if ( typeof lon === 'number' || ( typeof lon === 'string' && lon.indexOf(':') === -1 ) ) {
         // Singular number passed
         lon = [ lon ];
     } else {
@@ -129,7 +129,7 @@ var Grads = function( lat, lon, alt, time, model ) {
         }
     }
 
-    if ( typeof alt === 'number' ) {
+    if ( typeof alt === 'number' || ( typeof alt === 'string' && alt.indexOf(':') === -1 ) ) {
         // Singular number passed
         alt = [ alt ];
     } else {
@@ -177,7 +177,7 @@ var Grads = function( lat, lon, alt, time, model ) {
 
         if ( ( momentUsed && ( !time[0].isValid() || !time[1].isValid() ) ) ||
             ( !momentUsed && ( !moment(time[0]).isValid() || !moment(time[1]).isValid() ) ) ) {
-            throw new Error('Invalid Altitude value was set');
+            throw new Error('Invalid Time value was set');
         }
 
         if ( time[0] > time[1] ) {
