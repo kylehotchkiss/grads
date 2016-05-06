@@ -20,10 +20,10 @@ Coming soon!
 
 Basically:
 
-    var grads = new Grads( lat, lon, alt(m) );
+    var grads = new Grads( lat(decimal), lon(decimal), alt(meters), time(JS Time), model(optional) );
 
     grads.fetch('temperature', function( values, config ) {
-        var tempInKelvin = values[0][0][0];
+        var tempInKelvin = values[0][0][0].values.temperature;
     });
 
 # TODO
